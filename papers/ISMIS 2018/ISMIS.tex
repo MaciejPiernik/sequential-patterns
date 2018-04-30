@@ -1,0 +1,113 @@
+\documentclass[runningheads,a4paper]{llncs}
+
+\usepackage[cmex10]{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{color}
+\usepackage{subfig}
+\usepackage[unicode,
+					  colorlinks,
+						linkcolor={red},
+						citecolor={blue},
+						urlcolor={blue},
+            pdfauthor={Arkadiusz Jachnik, Maciej Piernik},
+            pdftitle={Sequential pattern mining with uplift measure},
+            pdfsubject={Sequential pattern mining},
+            pdfkeywords={sequential patterns, uplift modeling}]{hyperref}
+
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+\newcommand{\argmax}[1]{\underset{#1}{\operatorname{argmax}}\;}
+\newcommand{\matr}[1]{\mathbf{#1}}
+
+\begin{document}
+
+\mainmatter
+
+\title{Sequential pattern mining with uplift measure}
+
+\titlerunning{Sequential pattern mining with uplift measure}
+
+\author{Arkadiusz Jachnik \and Maciej Piernik}
+
+\authorrunning{Arkadiusz Jachnik \and Maciej Piernik}
+
+\institute{Institute of Computing Science, Poznan University of Technology\\
+ul. Piotrowo 2, 60--965 Poznan, Poland\\
+\email{maciej.piernik@cs.put.poznan.pl}}
+
+\maketitle
+
+\begin{abstract}
+
+\keywords{sequential patterns, uplift modeling}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:introduction}
+Sequential data
+
+Sequential patterns
+
+Sequential data with status
+
+Uplift modeling
+
+In this paper, 
+
+The remainder of this paper is organized as follows.
+
+\section{Related Work}
+\label{sec:related}
+
+\section{Sequential pattern mining with uplift measure}
+\label{sec:main}
+
+\begin{figure}[!ht]
+	\centering
+		%\includegraphics[width=0.9\textwidth]{images/concept}
+	\caption{Illustration of the proposed method}
+	\label{fig:concept}
+\end{figure}
+\vspace{-10pt}
+
+\section{Experiments}
+\label{sec:experiments}
+\subsection{Experimental Setup}
+
+Fig.~\ref{fig:setup} depicts the experimental procedure.
+\begin{figure}[h]
+	\centering
+		%\includegraphics[width=0.60\textwidth]{images/setup}
+	\caption{Experimental procedure}
+	\label{fig:setup}
+\end{figure}
+
+\subsection{Datasets}
+
+\begin{table}[htbp]
+	\scriptsize
+  \centering
+  \caption{Characteristics of datasets}
+    \begin{tabularx}{\textwidth}{l@{}R@{}R@{}R@{}}
+		\toprule
+    Dataset  & \#Instances & Avg. seq. len. & \#Classes \\
+		\midrule
+
+    \bottomrule
+    \end{tabularx}%
+  \label{tab:datasets}%
+\end{table}%
+
+\subsection{Results}
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+
+\subsubsection*{Acknowledgments.} This research is partly funded by the Polish National Science Center under Grant No. DEC-2015/19/B/ST6/02637.
+
+\bibliographystyle{splncs}
+\bibliography{Bibliography}
+
+\end{document}
