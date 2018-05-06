@@ -71,7 +71,7 @@ A method aiming specifically at this task is uplift modeling, as it's goal, as o
 
 In this paper, we propose a solution to the problem of state--changing sequential pattern mining.
 Our method is designed to work in a setting where the information about states (classes) is provided separately from the underlying sequence of events.
-Inspired by clinical trials, it relies on the notion of control group and uses uplift modeling to factor this notion into the processing.
+Inspired by clinical trials, it relies on the notion of a control group and uses uplift modeling to factor this notion into the processing.
 We experimentally evaluate our proposal using real-world data to showcase its superiority w.r.t. traditional sequential patterns in the described scenarios.
 
 The remainder of this paper is organized as follows.
@@ -83,16 +83,46 @@ Finally, in Section~\ref{sec:conclusions}, we conclude the paper and draw lines 
 \section{Related Work}
 \label{sec:related}
 
-\section{Sequential pattern mining with uplift measure}
+\section{State--changing sequential patterns}
 \label{sec:main}
+
+\subsection{Conceptual description}
+To illustrate both, the problem we are tackling and our proposed solution, consider the following example.
+Assume we have a history of marketing campaigns conducted by some company to it's clients.
+A history of campaigns (in order of their occurrence) for a single client forms a single sequence of events.
+Furthermore, assume that, from time to time, the company also monitored it's clients opinion about the company.
+The opinion can be either negative, neutral, or positive (where negative $<$ neutral $<$ positive).
+A history of a single client's opinions (in order of the time they were queried) forms a single sequence of the client's states.
+Both of these sequences form a complete client's history, example of which is illustrated in Fig.~\ref{fig:example}.
 
 \begin{figure}[!ht]
 	\centering
-		%\includegraphics[width=0.9\textwidth]{images/concept}
+		\includegraphics[width=0.75\textwidth]{images/example}
+	\caption{Example of an analyzed sequence, where $e_i$ represent events for a given object (e.g., marketing campaigns directed at a given client) and $s_i$ represent the object's states (e.g., negative, neutral, or positive opinion about the analyzed company).}
+	\label{fig:example}
+\end{figure}
+
+Given the above, the problem of state--changing sequential patterns can be conceptualized as follows.
+Is it possible to find a subsequence of events (in this case, marketing campaigns) which will have a high probability of influencing the objects' state in a desired manner (in this case, changing the clients' opinion from a lower to a higher one).
+
+Our proposed solution for the above--defined problem is a 3-step generic method, which can be described as follows.
+In the first step, we mine the sequences of events for frequent sequential patterns, i.e., subsequences, which appear in the events dataset with a required minimal frequency.
+In the second step, we map the states sequences to sequences of change.
+Each state is mapped to a change indicator based on it's relation to the previous state.
+A change from a lower to a higher state is encoded as ``$\uparrow$'' (\textit{up}); a change from a higher to a lower state is encoded as ``$\downarrow$'' (\textit{down}); and no change is encoded as ``$-$'' (\textit{none}).
+The first state is mapped to ``$-$''.
+In the third phase, we calculate the uplift measure of each sequential pattern for a given change indicator (e.g., ``$\uparrow$''), by contrasting the probability of this change appearing after a given pattern among the sequences with this pattern against the probability of this change appearing among the sequences without this pattern.
+After this process, we have a list of sequential patterns with the information about their impact on a given change of state.
+The whole process is summarized in Fig.~\ref{fig:concept}.
+
+\begin{figure}[!ht]
+	\centering
+		\includegraphics[width=\textwidth]{images/concept}
 	\caption{Illustration of the proposed method}
 	\label{fig:concept}
 \end{figure}
-\vspace{-10pt}
+
+\subsection{Formal description}
 
 \section{Experiments}
 \label{sec:experiments}
@@ -126,7 +156,12 @@ Fig.~\ref{fig:setup} depicts the experimental procedure.
 
 \section{Conclusions}
 \label{sec:conclusions}
+Done
 
+Future work
+Time constraints
+Decay of status over time
+Instead of registering change (up/none/down), quantify difference between statuses
 
 \subsubsection*{Acknowledgments.} This research is partly funded by the Polish National Science Center under Grant No. DEC-2015/19/B/ST6/02637.
 
