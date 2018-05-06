@@ -123,6 +123,31 @@ The whole process is summarized in Fig.~\ref{fig:concept}.
 \end{figure}
 
 \subsection{Formal description}
+Preliminaries...
+sequence,
+sequence correspondence (events and states),
+$s$ contains $p$: $p\in s$,
+$d$ after $p$: $d^p$.
+
+Given the above, the method proposed in this paper is defined as follows.
+Given a set of event sequences $\mathcal{S}^e$, a set of corresponding state sequences $\mathcal{S}^s$, a desired direction of change \textit{d}, and a minimal support threshold \textit{minsup}, first, we are mining $\mathcal{S}^e$ for sequential patterns $\mathcal{P}=\left\{p:|\{s^e\in\mathcal{S}^e:p\subseteq s^e\}|\geq\textit{minsup}\right\}$.
+Next, each sequence of states $s^s\in\mathcal{S}^s$ is mapped into a sequence of changes $s^c\in\mathcal{S}^c$:
+\begin{equation*}
+\begin{split}
+&s^c_1=-\\
+&s^c_i=\begin{cases}
+	\uparrow & s^e_{i-1}<s^e_i \\
+	\downarrow & s^e_{i-1}>s^e_i \\
+	- & otherwise
+\end{cases}
+\end{split}
+\end{equation*}
+where $i=2..|s^e|$.
+Finally, for each sequential pattern $p\in\mathcal{P}$ and a given change direction $d$, uplift is calculated according to the following formula:
+\begin{equation*}
+\text{uplift}(p)=P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})-P(d|\{s^e\in\mathcal{S}^e:p\not\subseteq s^e\}),
+\end{equation*}
+where $P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})$ denotes the probability of $d$ appearing after $p$ in sequences of events containing $p$, and $P(d|\{s^e\in\mathcal{S}^e:p\not\subseteq s^e\})$ denotes the probability of $d$ appearing in sequences of events without $p$.
 
 \section{Experiments}
 \label{sec:experiments}
