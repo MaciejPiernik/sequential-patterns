@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{rotating} 
 \usepackage{color}
 \usepackage{subfig}
 \usepackage[unicode,
@@ -152,32 +153,86 @@ where $P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})$ denotes the probability of
 \section{Experiments}
 \label{sec:experiments}
 \subsection{Experimental Setup}
+This paper intends to evaluate the possibility of using state-changing sequential pattern mining to analyse real-world datasets, and on top of that, to assess the rightness of choice an uplift modelling to measure the actual influence of events on the change of state sequence values. Thus, we calculated several interestingness measures, such as support, confidence, coverage, prevalence, recall, lift, leverage, added value, Jaccard and relative risk. Then, we used them to assess the extent of sequential patterns occurrence on the positive shift ``$\uparrow$'' (\textit{up}) in state sequence values, and we compared them with an uplift measure.
 
-Fig.~\ref{fig:setup} depicts the experimental procedure.
-\begin{figure}[h]
-	\centering
-		%\includegraphics[width=0.60\textwidth]{images/setup}
-	\caption{Experimental procedure}
-	\label{fig:setup}
-\end{figure}
+Our solution was evaluated in a series of experiments using anonymised private data and publicly available datasets. We processed full datasets using different support values for each of them, using the Apriori algorithm to find sequential patterns. The experiments were prepared using software components implemented in R language. Almost all of the software components were implemented using R standard library. The exception is the component used for generation of two-element permutations of sequential candidate patterns, where we used "gtools" library. The experiments were conducted on the machine equipped with a dual-core I7-4770HQ @ 2,2 GHz processor and 16 GB of RAM.
 
 \subsection{Datasets}
+To prepare the experimental evaluation of the proposed method, we used three datasets containing sequential data. The Diabetes dataset is publicly available through the UCI Machine Learning Repository. It includes data about patients’ activity and blood sugar level measurements. A private marketing company provided the Events and Classes dataset. It contains data about marketing activity as well as the outcome of this activity. The FIFA dataset contains data about clickstream from the FIFA World Cup 98 webpage. It is publicly available on the website of SPMF – an open source data mining library.
+
+To test the proposed solution, we amended two of the test datasets. The Diabetes dataset contains numeric attribute describing blood sugar level. We discretised this attribute into three classes, respectively describing blood sugar level as high, normal and low. Regarding the FIFA dataset, we generated the state sequence based on the original data. To each event, we assigned one of the three values describing the length of a subsequence, denoted as short, medium and long. A subsequence starts with the first element of the original sequence and finishes with the event occurrence. 
 
 \begin{table}[htbp]
 	\scriptsize
   \centering
   \caption{Characteristics of datasets}
-    \begin{tabularx}{\textwidth}{l@{}R@{}R@{}R@{}}
+    \begin{tabularx}{\textwidth}{l@{}R@{}R@{}R@{}R@{}R@{}R@{}}
 		\toprule
-    Dataset  & \#Instances & Avg. seq. len. & \#Classes \\
+	{} & \multicolumn{3}{c}{Sequence of events} & \multicolumn{3}{c}{Sequence of states} \\
+        \toprule
+    Dataset & \#Instances & \#Elements & Avg. len. & \#Instances & \#Elements & Avg. len.\\
 		\midrule
-
-    \bottomrule
+	diabetes              &	3883	    &    20    &    7.6    &    3883    &    3    &    7.6 \\
+		\midrule
+	events and classes    &	4656	    &    114   &	   21.2   &    10685   &    3    &    26,5 \\
+		\midrule
+	fifa	                  &  20450    &  	29990  &   34.74   &    29990  &     3    &    34.74 \\
+        \bottomrule
     \end{tabularx}%
   \label{tab:datasets}%
 \end{table}%
 
 \subsection{Results}
+
+
+Table \ref{tab:results} presents the results of the state-changing sequential pattern mining experiments. It contains five sequential patterns with the highest uplift measure. We juxtaposed these results with the others interestingness measures. Values marked in bold represent the best result of the interestingness measure in a given dataset.
+
+\begin{sidewaystable}[htbp]
+	\scriptsize
+  \centering
+  \caption{Results of state-changing mining process - VALUES TO BE ROUNDED}
+    \begin{tabularx}{\textwidth}{l@{}c@{}R@{}c@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}}
+		\toprule
+	{} & \multicolumn{2}{c}{Sequential pattern} & \multicolumn{11}{c}{Change measures} \\
+        \toprule
+    Dataset          & Seq. pattern                                                                                      & Support & Class order & Uplift      & Support   & Confidence & Coverage  & Recall    & Lift      & Leverage  & Added value & Jaccard   & Relative risk\\
+		\midrule
+	Diabetes         & \textless$\left\{\text{58}\right\}$\textgreater                                                         & \textbf{0.9000773}                  & h \textless n \textless l   & \textbf{0.215933661} & \textbf{0.8879732} & 0.9865522 & \textbf{0.9000773}  & \textbf{0.9199573} & 1.022087 & 0.1177679 & 0.02131915 & \textbf{0.9085639} & \textbf{1.2802082} \\
+		\midrule
+	Diabetes         & \textless$\left\{\text{58}\right\}$,$\left\{\text{33}\right\}$\textgreater                              & 0.8011847                  & h \textless n \textless l   & 0.126367161 & 0.7934587 & 0.9903568 & 0.8011847  & 0.8220384 & 1.0260287 & 0.2170269 & 0.025123731 & 0.8155109 & 1.14626 \\
+		\midrule
+	Diabetes         & \textless$\left\{\text{58}\right\}$,$\left\{\text{33}\right\}$,$\left\{\text{33}\right\}$\textgreater   & 0.7347412                  & h \textless n \textless l   & 0.094069265 & 0.7275303 & 0.9901858 & 0.7347412  & 0.7537353 & 1.0258515 & 0.2809893 & 0.024952702 & 0.7481462 & 1.1049744 \\
+		\midrule
+	Diabetes         & \textless$\left\{\text{33}\right\}$\textgreater  & 0.870461 & h \textless n \textless l & 0.092231228 & 0.8503734 & 0.9769231 & 0.870461 & 0.8810032 & 1.0121111 & 0.1367254 & 0.01169001 & 0.8630423 & 1.1042524 \\
+		\midrule
+	Diabetes         & \textless$\left\{\text{58}\right\}$,$\left\{\text{62}\right\}$,$\left\{\text{33}\right\}$\textgreater & 0.6757662 & h \textless n \textless l & 0.081369626 & 0.6701004 & \textbf{0.9916159} & 0.6757662 & 0.6942369 & \textbf{1.0273331} & \textbf{0.339344} & \textbf{0.026382786} & 0.6901857 & 1.089393 \\
+	    \midrule
+	    \midrule
+    Events and Classes   & $\left\{\text{34}\right\}$,$\left\{\text{109}\right\}$ & 0.4653402 & a \textless b \textless c & \textbf{0.2526986} & \textbf{0.1874198} & \textbf{0.4027586} & 0.4653402 & \textbf{0.6985646} & \textbf{1.5011912} & 0.2779113 & \textbf{0.13446594} & \textbf{0.3431257} & \textbf{2.683983} \\
+        \midrule
+    Events and Classes & \textless$\left\{\text{109}\right\}$\textgreater & \textbf{0.465982} & a \textless b \textless c & 0.2519635 & \textbf{0.1874198} & 0.4022039 & \textbf{0.465982} & 0.6985646 & 1.4991235 & 0.2771843 & 0.13391117 & 0.342723 & 2.677069 \\
+        \midrule
+    Events and Classes & $\left\{\text{108}\right\}$,$\left\{\text{34}\right\}$ & 0.4531451 & a \textless b \textless c & 0.2449893 & 0.1822850 & 0.4022663 & 0.4531451 & 0.6794258 & 1.4993562 & \textbf{0.2806908} & 0.13397361 & 0.3380952 & 2.557693 \\
+        \midrule
+    Events and Classes & \textless$\left\{\text{108}\right\}$\textgreater  & 0.4537869 & a \textless b \textless c & 0.2442355 & 0.1822850 & 0.4016973 & 0.4537869 & 0.6794258 & 1.4972354 & 0.2799496 & 0.13340463 & 0.3376932 & 2.551078 \\
+        \midrule
+    Events and Classes & \textless$\left\{\text{108}\right\}$,$\left\{\text{34}\right\}$,$\left\{\text{109}\right\}$\textgreater & 0.4531451 & a \textless b \textless c & 0.2435729 & 0.1816431 & 0.4008499 & 0.4531451 & 0.6770335 & 1.4940767 & 0.2792744 & 0.13255718 & 0.3365042 & 2.548687 \\
+	    \midrule
+	    \midrule
+	Fifa & \textless$\left\{\text{90}\right\}$\textgreater & 0.4005379 & s \textless m \textless l & \textbf{0.4338547} & 0.3914425 & \textbf{0.9772921} & 0.4005379 & 0.5457831 & \textbf{1.362625} & \textbf{0.6900213} & \textbf{0.2600794} & 0.5389484 & \textbf{1.798353} \\
+	    \midrule
+    	Fifa & \textless$\left\{\text{13}\right\}$\textgreater & 0.4019560 & s \textless m \textless l & 0.4276943 & 0.3911002 & 0.9729927 & 0.4019560 & 0.5453058 & 1.356631 & 0.6847048 & 0.2557800 & 0.2557800 & 1.784331 \\
+    	    \midrule
+    Fifa & \textless$\left\{\text{18}\right\}$\textgreater & 0.4040587 & s \textless m \textless l & 0.4160361 & 0.3899756 & 0.9651458 & 0.4040587 & 0.5437376 & 1.345690 & 0.6753498 & 0.2479331 & 0.5332665 & 1.757656 \\
+        \midrule
+    Fifa & \textless$\left\{\text{30}\right\}$\textgreater & 0.4291443 & s \textless m \textless l & 0.3949717 & \textbf{0.4045477} & 0.9426846 & \textbf{0.4291443} & \textbf{0.5640554} & 1.314372 & 0.6348969 & 0.2254719 & \textbf{0.5453527} & 1.721129 \\
+        \midrule
+    Fifa & \textless$\left\{\text{2}\right\}$\textgreater & 0.4002934 & s \textless m \textless l & 0.3849705 & 0.3795110 & 0.9480821 & 0.4002934 & 0.5291471 & 1.321898 & 0.6609866 & 0.2308694 & 0.5142460 & 1.683649 \\
+        \bottomrule
+    \end{tabularx}%
+  \label{tab:results}%
+\end{sidewaystable}%
+
 
 \section{Conclusions}
 \label{sec:conclusions}
