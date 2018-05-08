@@ -124,29 +124,34 @@ The whole process is summarized in Fig.~\ref{fig:concept}.
 \end{figure}
 
 \subsection{Formal description}
-Preliminaries...
-sequence,
-sequence correspondence (events and states),
-$s$ contains $p$: $p\in s$,
-$d$ after $p$: $d^p$.
+By a \textit{sequence} $s=<s_1, s_2, ..., s_n>$ we understand an ordered multi--set of \textit{elements}, where each element $s_i$ is drawn from the same set.
+We distinguish two sets of sequences: sequences of events $\mathcal{S}^e$ and sequences of states $\mathcal{S}^s$, where the elements in the events sequences are drawn from the events set $\mathcal{E}$ and the elements in the states sequences are drawn from the ordered states set $\mathcal{S}$.
+Each events sequence $s^e\in\mathcal{S}^e$ has a corresponding states sequence $s^{se}\in\mathcal{S}^s$ (note that this correspondence is only one--sided).
+The corresponding sequences can be combined into a single sequence of events and states and there exists a total order between the elements of the combined sequences such that the order of the elements from each sequence is preserved.
 
-Given the above, the method proposed in this paper is defined as follows.
-Given a set of event sequences $\mathcal{S}^e$, a set of corresponding state sequences $\mathcal{S}^s$, a desired direction of change \textit{d}, and a minimal support threshold \textit{minsup}, first, we are mining $\mathcal{S}^e$ for sequential patterns $\mathcal{P}=\left\{p:|\{s^e\in\mathcal{S}^e:p\subseteq s^e\}|\geq\textit{minsup}\right\}$.
+A sequence $s'$ which elements form a subset of elements of another sequence $s$ is called a \textit{subsequence} of $s$ and is denoted as $s'\subseteq s$.
+Given a set of sequences $\mathcal{S}$, a sequence $p$ is called a \textit{sequential pattern} (or \textit{pattern}), if it is a subsequence of at least \textit{minsup} sequences in $\mathcal{S}$: $|\{s\in\mathcal{S}:p\subseteq s\}|\geq\textit{minsup}$, where \textit{minsup} is a user--defined minimal support parameter.
+We denote that a sequence $s$ \textit{contains} a pattern $p$ if $p\subseteq s$.
+Given a sequence $s=<s_1,s_2,...,s_n>$, its subsequence $s'=<s_{i_1}, s_{i2}, ..., s_{i_m}>$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$.
+
+Given the above, our method is defined as follows.
+Given a set of event sequences $\mathcal{S}^e$, a set of state sequences $\mathcal{S}^s$, a desired direction of change \textit{d}, and a minimal support threshold \textit{minsup}, first, we are mining $\mathcal{S}^e$ for sequential patterns $\mathcal{P}=\left\{p:|\{s^e\in\mathcal{S}^e:p\subseteq s^e\}|\geq\textit{minsup}\right\}$.
 Next, each sequence of states $s^s\in\mathcal{S}^s$ is mapped into a sequence of changes $s^c\in\mathcal{S}^c$:
 \begin{equation*}
 \begin{split}
 &s^c_1=-\\
 &s^c_i=\begin{cases}
-	\uparrow & s^e_{i-1}<s^e_i \\
-	\downarrow & s^e_{i-1}>s^e_i \\
+	\uparrow & s^s_{i-1}<s^s_i \\
+	\downarrow & s^s_{i-1}>s^s_i \\
 	- & otherwise
 \end{cases}
 \end{split}
 \end{equation*}
-where $i=2..|s^e|$.
-Finally, for each sequential pattern $p\in\mathcal{P}$ and a given change direction $d$, uplift is calculated according to the following formula:
+where $i=2..|s^s|$.
+The mapping preserves the correspondence relation with the events sequence and the total order of the combined elements of the events and changes sequences.
+Finally, for each sequential pattern $p\in\mathcal{P}$ and a given change direction $d$, \textit{uplift} is calculated according to the following formula:
 \begin{equation*}
-\text{uplift}(p)=P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})-P(d|\{s^e\in\mathcal{S}^e:p\not\subseteq s^e\}),
+\textit{uplift}(p,d)=P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})-P(d|\{s^e\in\mathcal{S}^e:p\not\subseteq s^e\}),
 \end{equation*}
 where $P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})$ denotes the probability of $d$ appearing after $p$ in sequences of events containing $p$, and $P(d|\{s^e\in\mathcal{S}^e:p\not\subseteq s^e\})$ denotes the probability of $d$ appearing in sequences of events without $p$.
 
