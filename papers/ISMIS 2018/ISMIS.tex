@@ -40,7 +40,16 @@ ul. Piotrowo 2, 60--965 Poznan, Poland\\
 \maketitle
 
 \begin{abstract}
-
+Designing algorithms for finding more meaningful patterns is one of the most important challenges in the field of sequential pattern mining.
+Additional data, when properly incorporated into the analysis, may help tailor the solution to the specific business requirement.
+Such a situation takes place in sequences of events targeted at certain objects (e.g., marketing campaigns, medical treatment, etc.) when state of the objects is being additionally monitored (e.g., client's attitude towards a brand or patient's health).
+In this paper, we propose to combine the information about the events with the information about state in mining for sequential patterns of events.
+Our solution is designed to allow for a more meaningful assessment of the influence of a given sequence of events on a given change of an object's state.
+To be able to properly interpret the changes in states as outcomes of sequences of events, we rely on the concept of a control group and uplift modeling.
+The state--changing sequential patterns are created in a three--step process involving sequential pattern mining, mapping states to changes, and calculating the uplift of each pattern.
+To illustrate the usefulness of our proposal in practical scenarios, we perform an experiment on 3 real--world datasets.
+Furthermore, we compare the outcomes of the uplift measure with 10 other measures used to assess the quality of sequential patterns.
+The results reveal that our method allows to find sequences which could otherwise be neglected.
 \keywords{sequential patterns, uplift modeling}
 \end{abstract}
 
@@ -257,7 +266,7 @@ Our method works by mining for frequent patterns in the events sequences, mappin
 The intuition behind this approach was to take the approach common from clinical trials and extend it to sequential data.
 By experimentally testing our proposal on 3 real--world datasets we validate its usefulness for practical problems.
 Furthermore, we empirically compare the employed uplift measure with 10 other measures used for sequential pattern evaluation.
-The results reveal that our method allows to find sequences which could be otherwise neglected.
+The results reveal that our method allows to find sequences which could otherwise be neglected.
 It also shows that uplift could be used interchangeably with relative risk, however, this was to be expected as these measures are highly related.
 
 As the issue tackled in this paper is itself novel, the possibilities of extending this work are very broad.
