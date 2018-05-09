@@ -25,7 +25,7 @@
 
 \mainmatter
 
-\title{State--changing sequential pattern mining using uplift modeling}
+\title{State--changing sequential patterns}
 
 \titlerunning{State--changing sequential patterns}
 
@@ -129,8 +129,6 @@ We distinguish two sets of sequences: sequences of events $\mathcal{S}^e$ and se
 Each events sequence $s^e\in\mathcal{S}^e$ has a corresponding states sequence $s^{se}\in\mathcal{S}^s$ (note that this correspondence is only one--sided).
 The corresponding sequences can be combined into a single sequence of events and states and there exists a total order between the elements of the combined sequences such that the order of the elements from each sequence is preserved.
 
-A sequence $s'$ which elements form a subset of elements of another sequence $s$ is called a \textit{subsequence} of $s$ and is denoted as $s'\subseteq s$.
-Given a set of sequences $\mathcal{S}$, a sequence $p$ is called a \textit{sequential pattern} (or \textit{pattern}), if it is a subsequence of at least \textit{minsup} sequences in $\mathcal{S}$: $|\{s\in\mathcal{S}:p\subseteq s\}|\geq\textit{minsup}$, where \textit{minsup} is a user--defined minimal support parameter.
 We denote that a sequence $s$ \textit{contains} a pattern $p$ if $p\subseteq s$.
 Given a sequence $s=<s_1,s_2,...,s_n>$, its subsequence $s'=<s_{i_1}, s_{i2}, ..., s_{i_m}>$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$.
 
@@ -253,12 +251,20 @@ Other measures, evaluated during our experiments, performed with a variable resu
 
 \section{Conclusions}
 \label{sec:conclusions}
-Done
+In this paper, we presented a solution to the problem of finding subsequences of events (e.g., marketing campaigns) with high probability of influencing the state of the objects targeted by these events (e.g., changing the clients’ opinion about a given brand).
+We call such subsequences state--changing sequential patterns.
+Our method works by mining for frequent patterns in the events sequences, mapping the states sequences to sequences encoding the changes in state, and evaluating the influence of the obtained patterns on these changes using uplift modeling.
+The intuition behind this approach was to take the approach common from clinical trials and extend it to sequential data.
+By experimentally testing our proposal on 3 real--world datasets we validate its usefulness for practical problems.
+Furthermore, we empirically compare the employed uplift measure with 10 other measures used for sequential pattern evaluation.
+The results reveal that our method allows to find sequences which could be otherwise neglected.
+It also shows that uplift could be used interchangeably with relative risk, however, this was to be expected as these measures are highly related.
 
-Future work
-Time constraints
-Decay of status over time
-Instead of registering change (up/none/down), quantify difference between statuses
+As the issue tackled in this paper is itself novel, the possibilities of extending this work are very broad.
+As our most immediate future research focus, we plan on experimenting with introducing time constraints to the problem.
+The constraints could concern both, events (e.g., restricting time gaps between events) and states (e.g., the certainty of a given object's state can decay over time until new state appears).
+Moreover, we intend to create other sequential pattern evaluation measures dedicated for this specific problem.
+We would also like to quantify the differences between states and include those differences in the analysis, as our current approach only registers the change in states' direction.
 
 \subsubsection*{Acknowledgments.} This research is partly funded by the Polish National Science Center under Grant No. DEC-2015/19/B/ST6/02637.
 
