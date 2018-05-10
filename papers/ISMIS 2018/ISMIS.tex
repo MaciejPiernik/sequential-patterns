@@ -67,16 +67,16 @@ Consider a sequence of treatments prescribed to a given patient for a certain di
 After a series of events (e.g., administered pharmaceuticals, medical procedures, dietary regulations) the indicator may either improve, worsen, or stay unchanged.
 However, this result does not necessarily coincide with any of the events nor need it be a result of one, all, or any of the events.
 This scenario is universal when modeling people's behavior, opinion, or --- more generally speaking --- \textit{state}.
-As illustrated by the examples above, this problem is no longer described by a single sequence of events (like in classical sequential pattern mining), but rather by two connected sequences --- one with the events and the other with classes.
+As illustrated by the examples above, this problem is no longer described by a single sequence of events (like in classical sequential pattern mining), but rather by two connected sequences --- one with the events and the other with states.
 To the best of our knowledge, processing of sequential data of such composition has not yet been considered and is the focus of this research.
 
-The assumption underlying the described scenario is that the events in the sequences influence the outcomes registered by the classes.
+The assumption underlying the described scenario is that the events in the sequences influence the outcomes registered by the states.
 A classical example of such an analysis performed on traditional data is the aforementioned clinical trial.
 In order to properly model the outcomes of patients' treatments, the results need to be evaluated against a control group.
 A method aiming specifically at this task is uplift modeling, as it's goal, as originally formulated, is to model the change in peoples' behavior as a result of intentional activity~\cite{Radcliffe:1999}.
 
 In this paper, we propose a solution to the problem of finding state--changing sequential patterns.
-Our method is designed to work in a setting where the information about states (classes) is provided separately from the underlying sequence of events.
+Our method is designed to work in a setting where the information about states is provided separately from the underlying sequence of events.
 Inspired by clinical trials, it relies on the notion of a control group and uses uplift modeling to factor this notion into the processing.
 We experimentally evaluate our proposal using real-world data to showcase its applicability in practical situations.
 
