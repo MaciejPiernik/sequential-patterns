@@ -15,7 +15,7 @@
             pdfauthor={Arkadiusz Jachnik, Maciej Piernik},
             pdftitle={State--changing sequential pattern mining using uplift modeling},
             pdfsubject={Sequential pattern mining},
-            pdfkeywords={sequential patterns, uplift modeling}]{hyperref}
+            pdfkeywords={sequential data, frequent patterns, uplift modeling}]{hyperref}
 
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 \newcommand{\argmax}[1]{\underset{#1}{\operatorname{argmax}}\;}
@@ -41,16 +41,16 @@ ul. Piotrowo 2, 60--965 Poznan, Poland\\
 
 \begin{abstract}
 Designing algorithms for finding more meaningful patterns is one of the most important challenges in the field of sequential pattern mining.
-Additional data, when properly incorporated into the analysis, may help tailor the solution to the specific business requirement.
-Such a situation takes place in sequences of events targeted at certain objects (e.g., marketing campaigns, medical treatment, etc.) when state of the objects is being additionally monitored (e.g., client's attitude towards a brand or patient's health).
-In this paper, we propose to combine the information about the events with the information about state in mining for sequential patterns of events.
-Our solution is designed to allow for a more meaningful assessment of the influence of a given sequence of events on a given direction of change of an object's state (up, down, or no change).
+This can be achieved by using additional information to enhance the evaluation of the obtained patterns.
+Such a situation takes place in sequences of events targeted at certain objects (e.g., marketing campaigns, medical treatment, etc.) when state of these objects is being additionally monitored (e.g., client's attitude towards a brand or patient's health).
+In this paper, we propose to combine the information about the events with the information about the states of the objects targeted by these events when mining for sequential patterns.
+Our solution is designed to allow for a more meaningful assessment of the influence the event sequences have on the change in the objects' state.
 To be able to properly interpret the changes in states as outcomes of sequences of events, we rely on the concept of a control group and uplift modeling.
 The state--changing sequential patterns are created in a three--step process involving sequential pattern mining, mapping states to changes, and calculating the uplift of each pattern.
 To illustrate the usefulness of our proposal in practical scenarios, we perform an experiment on 3 real--world datasets.
 Furthermore, we compare the outcomes of the uplift measure with 10 other measures used to assess the quality of sequential patterns.
 The results reveal that our method allows to find sequences which could otherwise be neglected.
-\keywords{sequential patterns, uplift modeling}
+\keywords{sequential data, frequent patterns, uplift modeling}
 \end{abstract}
 
 \section{Introduction}
@@ -156,7 +156,7 @@ The whole process is summarized in Fig.~\ref{fig:concept}.
 \end{figure}
 
 \subsection{Formal description}
-By a \textit{sequence} $s=\textless s_1, s_2, ..., s_n\textgreater$ we understand an ordered multi--set of \textit{elements}, where each element $s_i$ is drawn from the same set.
+By a \textit{sequence} $s=\text{\textless} s_1, s_2, ..., s_n\text{\textgreater}$ we understand an ordered multi--set of \textit{elements}, where each element $s_i$ is drawn from the same set.
 We distinguish two sets of sequences: sequences of events $\mathcal{S}^e$ and sequences of states $\mathcal{S}^s$, where the elements in the events sequences are drawn from the events set and the elements in the states sequences are drawn from the ordered states set.
 Each events sequence $s^e\in\mathcal{S}^e$ has a corresponding states sequence $s^{se}\in\mathcal{S}^s$ (note that this correspondence is only one--sided).
 The corresponding sequences can be combined into a single sequence of events and states and there exists a total order between the elements of the combined sequences such that the order of the elements from each sequence is preserved.
@@ -164,7 +164,7 @@ The corresponding sequences can be combined into a single sequence of events and
 A sequence $s'$ which elements form a subset of elements of another sequence $s$ is called a \textit{subsequence} of $s$ and is denoted as $s'\subseteq s$.
 Given a set of sequences $\mathcal{S}$, a sequence $p$ is called a \textit{sequential pattern} (or \textit{pattern}), if it is a subsequence of at least \textit{minsup} sequences in $\mathcal{S}$: $|\{s\in\mathcal{S}:p\subseteq s\}|\geq\textit{minsup}$, where \textit{minsup} is a user--defined minimal support parameter.
 We denote that a sequence $s$ \textit{contains} a pattern $p$ if $p\subseteq s$.
-Given a sequence $s=\textless s_1,s_2,...,s_n\textgreater$, its subsequence $s'=\textless s_{i_1}, s_{i2}, ..., s_{i_m}\textgreater$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$.
+Given a sequence $s=\text{\textless} s_1,s_2,...,s_n\text{\textgreater}$, its subsequence $s'=\text{\textless} s_{i_1}, s_{i2}, ..., s_{i_m}\text{\textgreater}$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$.
 
 Given the above, our method is defined as follows.
 Given a set of event sequences $\mathcal{S}^e$, a set of state sequences $\mathcal{S}^s$, a desired direction of change \textit{d}, and a minimal support threshold \textit{minsup}, first, we are mining $\mathcal{S}^e$ for sequential patterns $\mathcal{P}=\left\{p:|\{s^e\in\mathcal{S}^e:p\subseteq s^e\}|\geq\textit{minsup}\right\}$.
@@ -246,20 +246,20 @@ Values marked in bold represent the best result of a given measure for a particu
 
 We processed the \textit{diabetes} dataset with $\textit{minsup} = 0.4$, and, as a result, we found 89 sequential patterns.
 The values of uplift measure for these sequential patterns were from the range $[-0.28, 0.21]$.
-Pattern $\textless 58\textgreater$ was found to have the highest value of uplift measure.
+Pattern $\text{\textless} 58\text{\textgreater}$ was found to have the highest value of uplift measure.
 The event 58 corresponds to pre--breakfast blood glucose measurement, so it is the first activity which diabetes people do every day and also the one about which is the most difficult to forget during a daily run, what is confirmed in the high support value of this sequential pattern.
 Because during the day fluctuations of the blood sugar level could be high, it is also highly possible that we will notice a decrease in blood sugar level, what is illustrated by the high confidence level.
 
 Regarding the \textit{events} dataset, we processed this dataset with $\textit{minsup} = 0.45$.
 We found 12 sequential patterns.
 The values of the uplift measure were from the range $[0.14, 0.25]$.
-Pattern $\textless 34, 109\textgreater$ has the highest uplift value.
+Pattern $\text{\textless} 34, 109\text{\textgreater}$ has the highest uplift value.
 We do not have information about which marketing activity these two events describe, but the value of uplift measure suggests that these consecutive activities positively influence customers’ attitude towards the brand.
 The support value points out that this pattern is included in around 47\% of all sequences, while the confidence value shows that occurrence of this pattern positively affected customers in 40\%.
 
 Finally, we found 5 sequential patterns with $\textit{minsup}=0.4$ in the \textit{fifa} dataset.
 The values of uplift measure were from the range $[0.38, 0.43]$.
-The highest value of uplift measure can be found in pattern $\textless 90\textgreater$.
+The highest value of uplift measure can be found in pattern $\text{\textless} 90\text{\textgreater}$.
 We do not have the information about which website is described by the $90$ event in the dataset, but high value of the uplift measure indicates that users stayed longer on the FIFA website after seeing the content of this website.
 The support and confidence values were respectively 0.40 and 0.97.
 
@@ -283,37 +283,37 @@ This fact may lead to wrong interpretation of the obtained results and, in conse
         \toprule
     Dataset          & Seq. pattern                                                                                      & Support & Class order & Uplift      & Support   & Confidence & Coverage  & Recall    & Lift      & Leverage  & Added value & Jaccard   & Relative risk\\
 		\midrule
-	\textit{diabetes}         & $\textless 58\textgreater$                                                         & \textbf{0.90}                  & h \textless n \textless l   & \textbf{0.21} & \textbf{0.88} & 0.98 & \textbf{0.90}  & \textbf{0.92} & 1.02 & 0.11 & 0.02 & \textbf{0.90} & \textbf{1.28} \\
+	\textit{diabetes}         & $\text{\textless} 58\text{\textgreater}$                                                         & \textbf{0.90}                  & h \text{\textless} n \text{\textless} l   & \textbf{0.21} & \textbf{0.88} & 0.98 & \textbf{0.90}  & \textbf{0.92} & 1.02 & 0.11 & 0.02 & \textbf{0.90} & \textbf{1.28} \\
 		\midrule                             
-	\textit{diabetes}         & $\textless 58,33\textgreater$                              & 0.80                  & h \textless n \textless l   & 0.13 & 0.79 & 0.99 & 0.80  & 0.82 & 1.03 & 0.22 & 0.02 & 0.81 & 1.14 \\
+	\textit{diabetes}         & $\text{\textless} 58,33\text{\textgreater}$                              & 0.80                  & h \text{\textless} n \text{\textless} l   & 0.13 & 0.79 & 0.99 & 0.80  & 0.82 & 1.03 & 0.22 & 0.02 & 0.81 & 1.14 \\
 		\midrule                             
-	\textit{diabetes}         & $\textless 58,33,33\textgreater$   & 0.73                  & h \textless n \textless l   & 0.09 & 0.73 & 0.99 & 0.73  & 0.75 & 1.03 & 0.28 & 0.02 & 0.75 & 1.10 \\
+	\textit{diabetes}         & $\text{\textless} 58,33,33\text{\textgreater}$   & 0.73                  & h \text{\textless} n \text{\textless} l   & 0.09 & 0.73 & 0.99 & 0.73  & 0.75 & 1.03 & 0.28 & 0.02 & 0.75 & 1.10 \\
 		\midrule                             
-	\textit{diabetes}         & $\textless 33\textgreater$  & 0.87 & h \textless n \textless l & 0.09 & 0.85 & 0.98 & 0.87 & 0.88 & 1.01 & 0.14 & 0.01 & 0.86 & 1.10 \\
+	\textit{diabetes}         & $\text{\textless} 33\text{\textgreater}$  & 0.87 & h \text{\textless} n \text{\textless} l & 0.09 & 0.85 & 0.98 & 0.87 & 0.88 & 1.01 & 0.14 & 0.01 & 0.86 & 1.10 \\
 		\midrule                             
-	\textit{diabetes}         & $\textless 58,62,33\textgreater$ & 0.68 & h \textless n \textless l & 0.08 & 0.67 & \textbf{0.99} & 0.68 & 0.69 & \textbf{1.03} & \textbf{0.34} & \textbf{0.03} & 0.69 & 1.09 \\
+	\textit{diabetes}         & $\text{\textless} 58,62,33\text{\textgreater}$ & 0.68 & h \text{\textless} n \text{\textless} l & 0.08 & 0.67 & \textbf{0.99} & 0.68 & 0.69 & \textbf{1.03} & \textbf{0.34} & \textbf{0.03} & 0.69 & 1.09 \\
 	    \midrule
 	    \midrule
-    \textit{events}   & $\textless 34,109\textgreater$ & 0.46 & a \textless b \textless c & \textbf{0.25} & \textbf{0.19} & \textbf{0.40} & 0.46 & \textbf{0.70} & \textbf{1.50} & 0.28 & \textbf{0.13} & \textbf{0.34} & \textbf{2.68} \\
+    \textit{events}   & $\text{\textless} 34,109\text{\textgreater}$ & 0.46 & a \text{\textless} b \text{\textless} c & \textbf{0.25} & \textbf{0.19} & \textbf{0.40} & 0.46 & \textbf{0.70} & \textbf{1.50} & 0.28 & \textbf{0.13} & \textbf{0.34} & \textbf{2.68} \\
         \midrule
-    \textit{events}   & $\textless 109\textgreater$ & \textbf{0.47} & a \textless b \textless c & 0.25 & \textbf{0.19} & 0.40 & \textbf{0.47} & 0.70 & 1.50 & 0.28 & 0.13 & 0.34 & 2.68 \\
+    \textit{events}   & $\text{\textless} 109\text{\textgreater}$ & \textbf{0.47} & a \text{\textless} b \text{\textless} c & 0.25 & \textbf{0.19} & 0.40 & \textbf{0.47} & 0.70 & 1.50 & 0.28 & 0.13 & 0.34 & 2.68 \\
         \midrule
-    \textit{events}   & $\textless 108,34\textgreater$ & 0.45 & a \textless b \textless c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.50 & \textbf{0.28} & 0.13 & 0.34 & 2.56 \\
+    \textit{events}   & $\text{\textless} 108,34\text{\textgreater}$ & 0.45 & a \text{\textless} b \text{\textless} c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.50 & \textbf{0.28} & 0.13 & 0.34 & 2.56 \\
         \midrule
-    \textit{events}   & $\textless 108\textgreater$  & 0.45 & a \textless b \textless c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.50 & 0.28 & 0.13 & 0.34 & 2.55 \\
+    \textit{events}   & $\text{\textless} 108\text{\textgreater}$  & 0.45 & a \text{\textless} b \text{\textless} c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.50 & 0.28 & 0.13 & 0.34 & 2.55 \\
         \midrule
-    \textit{events}   & $\textless 108,34,109\textgreater$ & 0.45 & a \textless b \textless c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.49 & 0.28 & 0.13 & 0.34 & 2.55 \\
+    \textit{events}   & $\text{\textless} 108,34,109\text{\textgreater}$ & 0.45 & a \text{\textless} b \text{\textless} c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.49 & 0.28 & 0.13 & 0.34 & 2.55 \\
 	    \midrule
 	    \midrule
-	\textit{fifa} & $\textless 90\textgreater$ & 0.40 & s \textless m \textless l & \textbf{0.43} & 0.39 & \textbf{0.98} & 0.40 & 0.55 & \textbf{1.36} & \textbf{0.69} & \textbf{0.26} & 0.54 & \textbf{1.80} \\
+	\textit{fifa} & $\text{\textless} 90\text{\textgreater}$ & 0.40 & s \text{\textless} m \text{\textless} l & \textbf{0.43} & 0.39 & \textbf{0.98} & 0.40 & 0.55 & \textbf{1.36} & \textbf{0.69} & \textbf{0.26} & 0.54 & \textbf{1.80} \\
 	    \midrule
-    	\textit{fifa} & $\textless 13\textgreater$ & 0.40 & s \textless m \textless l & 0.43 & 0.39 & 0.97 & 0.40 & 0.54 & 1.36 & 0.68 & 0.26 & 0.26 & 1.78 \\
+    	\textit{fifa} & $\text{\textless} 13\text{\textgreater}$ & 0.40 & s \text{\textless} m \text{\textless} l & 0.43 & 0.39 & 0.97 & 0.40 & 0.54 & 1.36 & 0.68 & 0.26 & 0.26 & 1.78 \\
     	    \midrule
-    \textit{fifa} & $\textless 18\textgreater$ & 0.40 & s \textless m \textless l & 0.42 & 0.39 & 0.96 & 0.40 & 0.54 & 1.35 & 0.67 & 0.25 & 0.53 & 1.76 \\
+    \textit{fifa} & $\text{\textless} 18\text{\textgreater}$ & 0.40 & s \text{\textless} m \text{\textless} l & 0.42 & 0.39 & 0.96 & 0.40 & 0.54 & 1.35 & 0.67 & 0.25 & 0.53 & 1.76 \\
         \midrule
-    \textit{fifa} & $\textless 30\textgreater$ & \textbf{0.42} & s \textless m \textless l & 0.39 & \textbf{0.40} & 0.94 & \textbf{0.43} & \textbf{0.56} & 1.31 & 0.63 & 0.22 & \textbf{0.54} & 1.72 \\
+    \textit{fifa} & $\text{\textless} 30\text{\textgreater}$ & \textbf{0.42} & s \text{\textless} m \text{\textless} l & 0.39 & \textbf{0.40} & 0.94 & \textbf{0.43} & \textbf{0.56} & 1.31 & 0.63 & 0.22 & \textbf{0.54} & 1.72 \\
         \midrule
-    \textit{fifa} & $\textless 2\textgreater$ & 0.40 & s \textless m \textless l & 0.38 & 0.38 & 0.95 & 0.40 & 0.52 & 1.32 & 0.66 & 0.23 & 0.51 & 1.68 \\
+    \textit{fifa} & $\text{\textless} 2\text{\textgreater}$ & 0.40 & s \text{\textless} m \text{\textless} l & 0.38 & 0.38 & 0.95 & 0.40 & 0.52 & 1.32 & 0.66 & 0.23 & 0.51 & 1.68 \\
         \bottomrule
     \end{tabularx}%
   \label{tab:results}%
