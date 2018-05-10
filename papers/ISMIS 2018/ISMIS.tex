@@ -55,10 +55,6 @@ The results reveal that our method allows to find sequences which could otherwis
 
 \section{Introduction}
 \label{sec:introduction}
-%More and more data generated every day come in the form of sequences.
-%Examples...
-%With such prevalence, many types of analyses are possible, including classification, clustering, and outlier detection.
-%However, probably the most studied field of sequential data processing is sequential pattern mining.
 
 Sequential patterns are an extension of frequent patterns (or frequent itemsets, known from association rule mining) to sequential data.
 They find many applications in domains such as customer transaction analysis, web mining, software bug analysis, chemical and biological analysis~\cite{Aggarwal:2014}.
@@ -92,6 +88,33 @@ Finally, in Section~\ref{sec:conclusions}, we conclude the paper and draw lines 
 
 \section{Related Work}
 \label{sec:related}
+As more and more data generated every day come in the form of sequences, mining in sequential data has been extensively studied over the recent decades~\cite{Dong:2009,Fournier:2017}.
+Sequential pattern mining is probably the most studied field in this area and many algorithms have been proposed to solve this problem.
+One of the first approaches to address this problem was an extension of a well known pattern mining algorithm Apriori~\cite{Agrawal:1994}, called AprioriAll~\cite{Agrawal:1995}.
+Although straightforward, the algorithm suffers from low efficiency due to multiple database scans and generating massive candidate sets.
+As a natural consequence, many other approaches followed, aiming at reducing the complexity of the mining process, examples of which are Spade~\cite{Zaki:2001}, PrefixSpan~\cite{Pei:2004}, Lapin~\cite{Yang:2007}, or CM-Spade~\cite{Fournier:2014}.
+
+Several methods were also introduced to mine for sequential patterns with additional constraints, most notably, closed and maximal sequential patterns as well as sequential patterns with time constraints.
+Closed sequential patterns, apart from being frequent, have an additional restriction of not having any supersequence with the same frequency in the dataset among other patterns.
+This can drastically reduce the number of generated patterns, yet, it is still possible to recover all sequential patterns along with their support without the necessity to scan the dataset.
+Examples of algorithms mining for such patterns are CloSpan~\cite{Yan:2003} and BIDE~\cite{Wang:2004}.
+Maximal sequential patterns restrict the patterns even further, so that no pattern can have any supersequence among other patterns.
+This reduces the number of patterns even further, although this process is not fully reversible.
+After applying the restriction, other sequential patterns can be recreated, however, without the information about their support (only the lower--bound is known from the maximal patterns).
+Examples of algorithms dedicated to finding maximal sequential patterns are MaxSP~\cite{Fournier:2013} and VMSP~\cite{Fournier:2014-2}.
+The most well--known method for finding time--constrained sequential patterns is GSP~\cite{Srikant:1996}.
+As its most notable feature, GSP puts time restrictions on the gaps between elements appearing in a pattern, so that two elements cannot appear too close or too far after one another.
+
+All of these approaches can be used to tackle the problem defined in this paper, i.e., to find frequent patterns of events.
+However, as they are all dedicated for general, single--sequence problems, they are unable to include the information about how these patterns would affect the objects' states.
+To the best of our knowledge, our proposal is the first attempt at solving this problem.
+As our method performs sequential pattern mining in the first step, it could in principle use any of the above--defined methods.
+Therefore, the research stated in this paper is novel w.r.t. the previous methods, nevertheless, complementary.
+
+In the context of assessing the usefulness of a given pattern, many methods have been proposed for non--sequential data in the context of association rule mining~\cite{Lenca:2007,Tan:2002}.
+However, we did not find any measures which would be sequential--data--specific, let alone designed for sequences of events with changing state.
+As our goal is to measure the influence a given sequential pattern has on a particular change of state, we rely on a measure inspired by uplift modeling~\cite{Radcliffe:1999}.
+However, our experiments show that other measures of effect, like relative risk, can be used with the same results after adjusting them to the analyzed problem.
 
 \section{State--changing sequential patterns}
 \label{sec:main}
@@ -108,7 +131,7 @@ Both of these sequences form a complete client's history, example of which is il
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[width=0.75\textwidth]{images/example}
-	\caption{Example of an analyzed sequence, where $e_i$ represent events for a given object (e.g., marketing campaigns directed at a given client) and $s_i$ represent the object's states (e.g., negative, neutral, or positive opinion about the analyzed company).}
+	\caption{Example of an analyzed sequence, where $e_i$ represent events for a given object (e.g., marketing campaigns directed at a given client) and $s_i$ represent the object's states (e.g., negative, neutral, or positive opinion about a given brand).}
 	\label{fig:example}
 \end{figure}
 
@@ -165,7 +188,7 @@ where $P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})$ denotes the probability of
 \section{Experiments}
 \label{sec:experiments}
 \subsection{Experimental Setup}
-This paper intends to evaluate the possibility of using a state--changing sequential pattern mining to analyse real-world datasets as well as to assess the rightness of choice an uplift modelling to measure the actual influence of a sequential pattern occurrence on the changeability of a states sequence. Our solution was evaluated in a series of experiments using anonymised private data and publicly available datasets. We processed full datasets with different support values for each of them, using an Apriori algorithm to find sequential patterns. Also, we calculated several interestingness measures, such as support, confidence, coverage, prevalence, recall, lift, leverage, added value, Jaccard and relative risk to assess the extent of influence of a sequential pattern on the positive shift ``$\uparrow$'' (\textit{up}) in a sequence of states. Then, we compared these measures with an uplift measure and analysed the results. 
+This paper intends to evaluate the possibility of using a state--changing sequential pattern mining to analyze real-world datasets as well as to assess the rightness of choice an uplift modelling to measure the actual influence of a sequential pattern occurrence on the changeability of a states sequence. Our solution was evaluated in a series of experiments using anonymised private data and publicly available datasets. We processed full datasets with different support values for each of them, using an Apriori algorithm to find sequential patterns. Also, we calculated several interestingness measures, such as support, confidence, coverage, prevalence, recall, lift, leverage, added value, Jaccard and relative risk to assess the extent of influence of a sequential pattern on the positive shift ``$\uparrow$'' (\textit{up}) in a sequence of states. Then, we compared these measures with an uplift measure and analyzed the results. 
 
 The experiments were prepared using software components implemented in R language. Almost all of the software components were implemented using R standard library. The exception is the component used for generation of two-element permutations of sequential candidate patterns, where we used "gtools" library. The experiments were conducted on the machine equipped with a dual-core I7-4770HQ @ 2,2 GHz processor and 16 GB of RAM.
 
@@ -205,9 +228,12 @@ Regarding the events and classes dataset, we processed this dataset with \textit
 
 Finally, we found 5 sequential patterns with \textit{minsup}=0.4 in the FIFA dataset. The values of uplift measure were from the range \textless 0.3849705; 0.4338547\textgreater. The highest value of uplift measure has pattern \textless$\left\{\text{90}\right\}$\textgreater. We do not have information which website is described by the $\{\text{90}\}$ event in the dataset, but high value of the uplift measure allows suggesting that users stayed longer on the FIFA website after seeing the content of this website. The support and confidence values were respectively 0.4005379 and 0.9772921.
 
-We noticed the high correlation between uplift and relative risk measures for each of analysed dataset. To understand, why does this correlation exist, it is required to take a closer look at the structure of these interestingness measures. An uplift measure tries to estimate the increase of some event occurrence probability in a treated subpopulation over the corresponding probability when a subpopulation was not treated, whereas a relative risk is the ratio of the same probabilities. Thus, an uplift measure presents the actual change of probability, while a relative risk expresses the relative relation between probabilities.
+We noticed the high correlation between uplift and relative risk measures for each of analyzed dataset. To understand, why does this correlation exist, it is required to take a closer look at the structure of these interestingness measures. An uplift measure tries to estimate the increase of some event occurrence probability in a treated subpopulation over the corresponding probability when a subpopulation was not treated, whereas a relative risk is the ratio of the same probabilities. Thus, an uplift measure presents the actual change of probability, while a relative risk expresses the relative relation between probabilities.
 
-Other measures, evaluated during our experiments performed with a variable result. To understand this fact, it is again required to analyse differences between the construction of uplift measure and other interestingness measures used in this experimental evaluation. An uplift measure models the difference of probability of an event occurrence, between treated and not treated population, while measures like coverage, prevalence, recall, lift, leverage, added value and Jaccard estimate the probability of event occurrence by considering entire probability space. This fact may cause misleading results especially when the goal of the analysis is to measure the change of sequence state under some given implications.
+Other measures, evaluated during our experiments performed with a variable result.
+To understand this fact, it is again required to analyze differences between the construction of uplift measure and other interestingness measures used in this experimental evaluation.
+Uplift models the difference of probability of an event occurrence, between treated and not treated population, while measures like coverage, prevalence, recall, lift, leverage, added value and Jaccard estimate the probability of event occurrence by considering entire probability space.
+This fact may cause misleading results especially when the goal of the analysis is to measure the change of sequence state under some given implications.
 
 \begin{sidewaystable}[htbp]
 	\scriptsize
