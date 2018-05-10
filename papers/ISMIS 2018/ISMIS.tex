@@ -44,7 +44,7 @@ Designing algorithms for finding more meaningful patterns is one of the most imp
 Additional data, when properly incorporated into the analysis, may help tailor the solution to the specific business requirement.
 Such a situation takes place in sequences of events targeted at certain objects (e.g., marketing campaigns, medical treatment, etc.) when state of the objects is being additionally monitored (e.g., client's attitude towards a brand or patient's health).
 In this paper, we propose to combine the information about the events with the information about state in mining for sequential patterns of events.
-Our solution is designed to allow for a more meaningful assessment of the influence of a given sequence of events on a given change of an object's state.
+Our solution is designed to allow for a more meaningful assessment of the influence of a given sequence of events on a given direction of change of an object's state (up, down, or no change).
 To be able to properly interpret the changes in states as outcomes of sequences of events, we rely on the concept of a control group and uplift modeling.
 The state--changing sequential patterns are created in a three--step process involving sequential pattern mining, mapping states to changes, and calculating the uplift of each pattern.
 To illustrate the usefulness of our proposal in practical scenarios, we perform an experiment on 3 real--world datasets.
@@ -113,7 +113,7 @@ Therefore, the research stated in this paper is different from the previous meth
 
 In the context of assessing the usefulness of a given pattern, many methods have been proposed for non--sequential data in the context of association rule mining~\cite{Lenca:2007,Tan:2002}.
 However, we did not find any measures which would be sequential--data--specific, let alone designed for sequences of events with state.
-As our goal is to measure the influence a given sequential pattern has on a particular change of state, we rely on a measure inspired by uplift modeling~\cite{Radcliffe:1999}.
+As our goal is to measure the influence a given sequential pattern has on a particular direction of change in state, we rely on a measure inspired by uplift modeling~\cite{Radcliffe:1999}.
 However, our experiments show that other measures of effect, like relative risk, could be used with the same result.
 
 \section{State--changing sequential patterns}
@@ -140,10 +140,10 @@ Is it possible to find a subsequence of events (e.g., marketing campaigns) which
 
 Our proposed solution for the above--defined problem is a 3-step generic method, which can be described as follows.
 In the first step, we mine the sequences of events for frequent sequential patterns, i.e., subsequences, which appear in the events dataset with a required minimal frequency.
-In the second step, we map the states sequences to sequences of change.
+In the second step, we map the states sequences to sequences of directions of change.
 Each state is mapped to a change indicator based on it's relation to the previous state.
-A change from a lower to a higher state is encoded as ``$\uparrow$'' (\textit{up}); a change from a higher to a lower state is encoded as ``$\downarrow$'' (\textit{down}); and no change is encoded as ``$-$'' (\textit{none}).
-The first state is mapped to ``$-$''.
+A change from a lower to a higher state is encoded as ``$\uparrow$'' (\textit{up}); a change from a higher to a lower state is encoded as ``$\downarrow$'' (\textit{down}); and no change is encoded as ``$\emptyset$'' (\textit{none}).
+The first state is mapped to ``$\emptyset$''.
 In the third phase, we calculate the uplift measure of each sequential pattern for a given change indicator (e.g., ``$\uparrow$''), by contrasting the probability of this change appearing after a given pattern among the sequences with this pattern against the probability of this change appearing among the sequences without this pattern.
 After this process, we have a list of sequential patterns with the information about their impact on a given change of state.
 The whole process is summarized in Fig.~\ref{fig:concept}.
@@ -156,15 +156,15 @@ The whole process is summarized in Fig.~\ref{fig:concept}.
 \end{figure}
 
 \subsection{Formal description}
-By a \textit{sequence} $s=<s_1, s_2, ..., s_n>$ we understand an ordered multi--set of \textit{elements}, where each element $s_i$ is drawn from the same set.
-We distinguish two sets of sequences: sequences of events $\mathcal{S}^e$ and sequences of states $\mathcal{S}^s$, where the elements in the events sequences are drawn from the events set $\mathcal{E}$ and the elements in the states sequences are drawn from the ordered states set $\mathcal{S}$.
+By a \textit{sequence} $s=\textless s_1, s_2, ..., s_n\textgreater$ we understand an ordered multi--set of \textit{elements}, where each element $s_i$ is drawn from the same set.
+We distinguish two sets of sequences: sequences of events $\mathcal{S}^e$ and sequences of states $\mathcal{S}^s$, where the elements in the events sequences are drawn from the events set and the elements in the states sequences are drawn from the ordered states set.
 Each events sequence $s^e\in\mathcal{S}^e$ has a corresponding states sequence $s^{se}\in\mathcal{S}^s$ (note that this correspondence is only one--sided).
 The corresponding sequences can be combined into a single sequence of events and states and there exists a total order between the elements of the combined sequences such that the order of the elements from each sequence is preserved.
 
 A sequence $s'$ which elements form a subset of elements of another sequence $s$ is called a \textit{subsequence} of $s$ and is denoted as $s'\subseteq s$.
 Given a set of sequences $\mathcal{S}$, a sequence $p$ is called a \textit{sequential pattern} (or \textit{pattern}), if it is a subsequence of at least \textit{minsup} sequences in $\mathcal{S}$: $|\{s\in\mathcal{S}:p\subseteq s\}|\geq\textit{minsup}$, where \textit{minsup} is a user--defined minimal support parameter.
 We denote that a sequence $s$ \textit{contains} a pattern $p$ if $p\subseteq s$.
-Given a sequence $s=<s_1,s_2,...,s_n>$, its subsequence $s'=<s_{i_1}, s_{i2}, ..., s_{i_m}>$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$.
+Given a sequence $s=\textless s_1,s_2,...,s_n\textgreater$, its subsequence $s'=\textless s_{i_1}, s_{i2}, ..., s_{i_m}\textgreater$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$.
 
 Given the above, our method is defined as follows.
 Given a set of event sequences $\mathcal{S}^e$, a set of state sequences $\mathcal{S}^s$, a desired direction of change \textit{d}, and a minimal support threshold \textit{minsup}, first, we are mining $\mathcal{S}^e$ for sequential patterns $\mathcal{P}=\left\{p:|\{s^e\in\mathcal{S}^e:p\subseteq s^e\}|\geq\textit{minsup}\right\}$.
@@ -175,7 +175,7 @@ Next, each sequence of states $s^s\in\mathcal{S}^s$ is mapped into a sequence of
 &s^c_i=\begin{cases}
 	\uparrow & s^s_{i-1}<s^s_i \\
 	\downarrow & s^s_{i-1}>s^s_i \\
-	- & otherwise
+	\emptyset & otherwise
 \end{cases}
 \end{split}
 \end{equation*}
@@ -190,14 +190,33 @@ where $P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})$ denotes the probability of
 \section{Experiments}
 \label{sec:experiments}
 \subsection{Experimental Setup}
-This paper intends to evaluate the possibility of using a state--changing sequential pattern mining to analyze real-world datasets as well as to assess the rightness of choice an uplift modelling to measure the actual influence of a sequential pattern occurrence on the changeability of a states sequence. Our solution was evaluated in a series of experiments using anonymised private data and publicly available datasets. We processed full datasets with different support values for each of them, using an Apriori algorithm to find sequential patterns. Also, we calculated several interestingness measures, such as support, confidence, coverage, prevalence, recall, lift, leverage, added value, Jaccard and relative risk to assess the extent of influence of a sequential pattern on the positive shift ``$\uparrow$'' (\textit{up}) in a sequence of states. Then, we compared these measures with an uplift measure and analyzed the results. 
+This paper intends to evaluate the possibility of using state--changing sequential patterns as a means to analyzing real--world datasets as well as to assess the rightness of choice of uplift modeling to measure the influence of sequential patterns of events on a given direction of change in state.
+Our solution was evaluated in a series of experiments using anonymized private data and publicly available datasets.
+We processed full datasets with different support values for each of them using the Apriori algorithm to find sequential patterns.
+Furthermore, we calculated several measures for evaluating the quality of patterns, such as support, confidence, coverage, prevalence, recall, lift, leverage, added value, Jaccard, and relative risk, to assess the extent of influence of each pattern on the ``$\uparrow$'' direction of change.
+Afterward, we compared these measures with the uplift measure and analyzed the results. 
 
-The experiments were prepared using software components implemented in R language. Almost all of the software components were implemented using R standard library. The exception is the component used for generation of two-element permutations of sequential candidate patterns, where we used "gtools" library. The experiments were conducted on the machine equipped with a quad-core I7-4770HQ @ 2,2 GHz processor and 16 GB of RAM.
+The experiments were prepared using software components implemented in R language.
+Almost all of the software components were implemented using R standard library.
+The exception is the component used for generating two--element permutations of sequential candidate patterns, where we used ``gtools'' library.
+The experiments were conducted on a machine equipped with a quad-core I7-4770HQ @ 2,2 GHz processor and 16 GB of RAM.
 
 \subsection{Datasets}
-To prepare the experimental evaluation of the proposed solution, we used three datasets containing sequential data. The Diabetes dataset is publicly available through the UCI Machine Learning Repository~\cite{Kahn:1994}. It includes data about the activity of diabetes people and blood sugar level measurements. A private marketing company provided the Events and Classes dataset. It contains data about marketing activity as well as the outcome of this activity. The FIFA dataset contains data about clickstream from the FIFA World Cup 98 webpage. It is publicly available on the website of SPMF – an open source data mining library~\cite{Fournier}. Table \ref{tab:datasets} presents the summary of test datasets.
+To prepare the experimental evaluation of the proposed solution, we used three datasets containing sequential data.
+The \textit{diabetes} dataset is publicly available through the UCI Machine Learning Repository~\cite{Kahn:1994}.
+It includes data about the activity of diabetes people and blood sugar level measurements.
+A private marketing company provided the \textit{events} dataset.
+It contains data about marketing activity as well as the outcome of this activity.
+The \textit{fifa} dataset contains data about clickstream from the FIFA World Cup 98 webpage.
+It is publicly available on the website of SPMF – an open source data mining library~\cite{Fournier}.
+Table \ref{tab:datasets} presents the summary of each dataset.
 
-To test the proposed solution, we amended two of test datasets. The Diabetes dataset contains numeric attribute describing blood sugar level. We discretised this attribute into three classes, respectively describing blood sugar level as high, normal and low. Regarding the FIFA dataset, we generated the sequence of states based on the original data. To each event, we assigned one of the three values describing the length of a subsequence, denoted as short, medium and long. A subsequence starts with the first element of the original sequence and finishes with the given event occurrence. 
+To test the proposed solution, we had to augment two of the datasets with the information about states, which was not explicitly distinguished in the data.
+The \textit{diabetes} dataset contains numeric attribute describing blood sugar level.
+We discretized this attribute into three states describing blood sugar level as high, normal, and low, respectively.
+Regarding the \textit{fifa} dataset, we generated the missing sequences of states based on the original data.
+To each event, we assigned one of the three values describing the length of a subsequence, denoted as short, medium and long.
+A subsequence starts with the first element of the original sequence and finishes with a given event occurrence.
 
 \begin{table}[htbp]
 	\scriptsize
@@ -209,74 +228,92 @@ To test the proposed solution, we amended two of test datasets. The Diabetes dat
         \toprule
     Dataset & \#Instances & \#Elements & Avg. len. & \#Instances & \#Elements & Avg. len.\\
 		\midrule
-	diabetes              &	3883	    &    20    &    7.6    &    3883    &    3    &    7.6 \\
+	\textit{diabetes}              &	3883	    &    20    &    7.6    &    3883    &    3    &    7.6 \\
 		\midrule
-	events and classes    &	4656	    &    114   &	   21.2   &    10685   &    3    &    26,5 \\
+	\textit{events} &	4656	    &    114   &	   21.2   &    10685   &    3    &    26,5 \\
 		\midrule
-	fifa	                  &  20450    &  	29990  &   34.74   &    29990  &     3    &    34.74 \\
+	\textit{fifa}	                  &  20450    &  	29990  &   34.74   &    29990  &     3    &    34.74 \\
         \bottomrule
     \end{tabularx}%
   \label{tab:datasets}%
 \end{table}%
 
 \subsection{Results}
+Table~\ref{tab:results} presents the results of our experiments.
+It contains five sequential patterns with the highest uplift measure from each of the datasets.
+We juxtaposed these results with the other pattern evaluation measures described above.
+Values marked in bold represent the best result of a given measure for a particular dataset.
 
+We processed the \textit{diabetes} dataset with $\textit{minsup} = 0.4$, and, as a result, we found 89 sequential patterns.
+The values of uplift measure for these sequential patterns were from the range $[-0.28, 0.21]$.
+Pattern $\textless 58\textgreater$ was found to have the highest value of uplift measure.
+The event 58 corresponds to pre--breakfast blood glucose measurement, so it is the first activity which diabetes people do every day and also the one about which is the most difficult to forget during a daily run, what is confirmed in the high support value of this sequential pattern.
+Because during the day fluctuations of the blood sugar level could be high, it is also highly possible that we will notice a decrease in blood sugar level, what is illustrated by the high confidence level.
 
-Table \ref{tab:results} presents the results of state-changing sequential pattern mining. It contains five sequential patterns with the highest uplift measure from each of the datasets. We juxtaposed these results with the others interestingness measures. Values marked in bold represent the best result of a given interestingness measure in a dataset.
+Regarding the \textit{events} dataset, we processed this dataset with $\textit{minsup} = 0.45$.
+We found 12 sequential patterns.
+The values of the uplift measure were from the range $[0.14, 0.25]$.
+Pattern $\textless 34, 109\textgreater$ has the highest uplift value.
+We do not have information about which marketing activity these two events describe, but the value of uplift measure suggests that these consecutive activities positively influence customers’ attitude towards the brand.
+The support value points out that this pattern is included in around 47\% of all sequences, while the confidence value shows that occurrence of this pattern positively affected customers in 40\%.
 
-We processed the diabetes dataset with \textit{minsup} = 0.4, and as a result, we found 89 sequential patterns. The values of uplift measure for these sequential patterns were from the range \textless-0.285525302; 0.21593366\textgreater. The highest value of uplift measure has pattern \textless$\left\{\text{58}\right\}$\textgreater. The event $\{\text{58}\}$ corresponds to pre-breakfast blood glucose measurement, so it is the first activity which diabetes people do every day and also the one about which is the most difficult to forget during a daily run, what finds conformance in the high support value of this sequential pattern. Because during the day fluctuations of the blood sugar level could be high, it is also highly possible that we will notice a decrease in blood sugar level, what is illustrated by the high confidence level. 
+Finally, we found 5 sequential patterns with $\textit{minsup}=0.4$ in the \textit{fifa} dataset.
+The values of uplift measure were from the range $[0.38, 0.43]$.
+The highest value of uplift measure can be found in pattern $\textless 90\textgreater$.
+We do not have the information about which website is described by the $90$ event in the dataset, but high value of the uplift measure indicates that users stayed longer on the FIFA website after seeing the content of this website.
+The support and confidence values were respectively 0.40 and 0.97.
 
-Regarding the events and classes dataset, we processed this dataset with \textit{minsup} = 0.45. We found 12 sequential patterns. The values of the uplift measure were from the range \textless 0.1412099; 0.2526986\textgreater. The highest value of uplift measure has pattern \textless$\left\{\text{34}\right\}$,$\left\{\text{109}\right\}$\textgreater. We do not have information which marketing activity these two events describe, but the value of uplift measure allows suggesting that these consecutive activities positively influence customers’ attitude towards the brand. The support value points out that this pattern is included in around 47\% of all sequences, while the confidence value shows that occurrence of this pattern positively affected customers in 40\%.
+We noticed the high correlation between uplift and relative risk measures for each of the analyzed dataset.
+To understand why this correlation exists, it is required to take a closer look at the structure of these measures.
+Uplift tries to estimate the increase of some event's occurrence probability in a treated subpopulation over the corresponding probability when the subpopulation was not treated, whereas relative risk is the ratio of the same probabilities.
+Thus, uplift presents the actual change of probability, while relative risk expresses the relative relation between probabilities.
 
-Finally, we found 5 sequential patterns with \textit{minsup}=0.4 in the FIFA dataset. The values of uplift measure were from the range \textless 0.3849705; 0.4338547\textgreater. The highest value of uplift measure has pattern \textless$\left\{\text{90}\right\}$\textgreater. We do not have information which website is described by the $\{\text{90}\}$ event in the dataset, but high value of a uplift measure allows suggesting that users stayed longer on the FIFA website after seeing the content of this website. The support and confidence values were respectively 0.4005379 and 0.9772921.
-
-We noticed the high correlation between uplift and relative risk measures for each of analyzed dataset. To understand, why does this correlation exist, it is required to take a closer look at the structure of these interestingness measures. An uplift measure tries to estimate the increase of some event occurrence probability in a treated subpopulation over the corresponding probability when a subpopulation was not treated, whereas a relative risk is the ratio of the same probabilities. Thus, an uplift measure presents the actual change of probability, while a relative risk expresses the relative relation between probabilities.
-
-Other measures, evaluated during our experiments performed with a variable result. To understand this fact, it is again required to analyse differences between the construction of uplift measure and other interestingness measures used in this experimental evaluation.
-An uplift divides a probability space into treated and not treated subspaces, while measures like coverage, prevalence, recall, lift, leverage, added value and Jaccard estimate the probability of event occurrence by considering entire probability space.
-This fact may cause misleading results especially when the goal of the analysis is to measure the change of sequence state under some given implications.
+Other measures evaluated during our experiments performed with a varying result.
+To understand this fact, it is again required to analyze the differences between the construction of uplift measure and other measures used in this experiment.
+Uplift divides the probability space into treated and not treated subspaces, while measures like coverage, prevalence, recall, lift, leverage, added value, and Jaccard estimate the probability of event occurrence by considering the entire probability space.
+This fact may lead to wrong interpretation of the obtained results and, in consequence, to wrong and potentially costly mistakes in decision--making based on this interpretation.
 
 \begin{sidewaystable}[htbp]
 	\scriptsize
   \centering
-  \caption{Results of state-changing mining process}
+  \caption{Results of the experimental evaluation}
     \begin{tabularx}{\textwidth}{l@{}c@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}}
 		\toprule
-	{} & \multicolumn{2}{c}{Sequential pattern} & \multicolumn{11}{c}{Change measures} \\
+	{} & \multicolumn{2}{c}{Sequential pattern} & \multicolumn{11}{c}{Pattern quality measures} \\
         \toprule
     Dataset          & Seq. pattern                                                                                      & Support & Class order & Uplift      & Support   & Confidence & Coverage  & Recall    & Lift      & Leverage  & Added value & Jaccard   & Relative risk\\
 		\midrule
-	Diabetes         & \textless$\left\{\text{58}\right\}$\textgreater                                                         & \textbf{0.9001}                  & h \textless n \textless l   & \textbf{0.2159} & \textbf{0.8880} & 0.9866 & \textbf{0.9001}  & \textbf{0.9200} & 1.0221 & 0.1178 & 0.0213 & \textbf{0.9086} & \textbf{1.2802} \\
-		\midrule
-	Diabetes         & \textless$\left\{\text{58}\right\}$,$\left\{\text{33}\right\}$\textgreater                              & 0.8012                  & h \textless n \textless l   & 0.1264 & 0.7935 & 0.9904 & 0.8012  & 0.8220 & 1.0260 & 0.2170 & 0.0251 & 0.8155 & 1.1463 \\
-		\midrule
-	Diabetes         & \textless$\left\{\text{58}\right\}$,$\left\{\text{33}\right\}$,$\left\{\text{33}\right\}$\textgreater   & 0.7347                  & h \textless n \textless l   & 0.0941 & 0.7275 & 0.9902 & 0.7347  & 0.7537 & 1.0259 & 0.2810 & 0.0250 & 0.7481 & 1.1050 \\
-		\midrule
-	Diabetes         & \textless$\left\{\text{33}\right\}$\textgreater  & 0.8705 & h \textless n \textless l & 0.0922 & 0.8504 & 0.9769 & 0.8705 & 0.8810 & 1.0121 & 0.1367 & 0.0117 & 0.8630 & 1.1043 \\
-		\midrule
-	Diabetes         & \textless$\left\{\text{58}\right\}$,$\left\{\text{62}\right\}$,$\left\{\text{33}\right\}$\textgreater & 0.6758 & h \textless n \textless l & 0.0814 & 0.6701 & \textbf{0.9916} & 0.6758 & 0.6942 & \textbf{1.0273} & \textbf{0.3393} & \textbf{0.0264} & 0.6902 & 1.0894 \\
+	\textit{diabetes}         & $\textless 58\textgreater$                                                         & \textbf{0.90}                  & h \textless n \textless l   & \textbf{0.21} & \textbf{0.88} & 0.98 & \textbf{0.90}  & \textbf{0.92} & 1.02 & 0.11 & 0.02 & \textbf{0.90} & \textbf{1.28} \\
+		\midrule                             
+	\textit{diabetes}         & $\textless 58,33\textgreater$                              & 0.80                  & h \textless n \textless l   & 0.13 & 0.79 & 0.99 & 0.80  & 0.82 & 1.03 & 0.22 & 0.02 & 0.81 & 1.14 \\
+		\midrule                             
+	\textit{diabetes}         & $\textless 58,33,33\textgreater$   & 0.73                  & h \textless n \textless l   & 0.09 & 0.73 & 0.99 & 0.73  & 0.75 & 1.03 & 0.28 & 0.02 & 0.75 & 1.10 \\
+		\midrule                             
+	\textit{diabetes}         & $\textless 33\textgreater$  & 0.87 & h \textless n \textless l & 0.09 & 0.85 & 0.98 & 0.87 & 0.88 & 1.01 & 0.14 & 0.01 & 0.86 & 1.10 \\
+		\midrule                             
+	\textit{diabetes}         & $\textless 58,62,33\textgreater$ & 0.68 & h \textless n \textless l & 0.08 & 0.67 & \textbf{0.99} & 0.68 & 0.69 & \textbf{1.03} & \textbf{0.34} & \textbf{0.03} & 0.69 & 1.09 \\
 	    \midrule
 	    \midrule
-    E \& C   & $\left\{\text{34}\right\}$,$\left\{\text{109}\right\}$ & 0.4653 & a \textless b \textless c & \textbf{0.2527} & \textbf{0.1874} & \textbf{0.4028} & 0.4653 & \textbf{0.6986} & \textbf{1.5012} & 0.2779 & \textbf{0.1345} & \textbf{0.3431} & \textbf{2.6840} \\
+    \textit{events}   & $\textless 34,109\textgreater$ & 0.46 & a \textless b \textless c & \textbf{0.25} & \textbf{0.19} & \textbf{0.40} & 0.46 & \textbf{0.70} & \textbf{1.50} & 0.28 & \textbf{0.13} & \textbf{0.34} & \textbf{2.68} \\
         \midrule
-    E \& C   & \textless$\left\{\text{109}\right\}$\textgreater & \textbf{0.4660} & a \textless b \textless c & 0.2520 & \textbf{0.1874} & 0.4022 & \textbf{0.4660} & 0.6986 & 1.4991 & 0.2772 & 0.1339 & 0.3427 & 2.6771 \\
+    \textit{events}   & $\textless 109\textgreater$ & \textbf{0.47} & a \textless b \textless c & 0.25 & \textbf{0.19} & 0.40 & \textbf{0.47} & 0.70 & 1.50 & 0.28 & 0.13 & 0.34 & 2.68 \\
         \midrule
-    E \& C   & $\left\{\text{108}\right\}$,$\left\{\text{34}\right\}$ & 0.4531 & a \textless b \textless c & 0.2450 & 0.1823 & 0.4023 & 0.4531 & 0.6794 & 1.4994 & \textbf{0.2807} & 0.1340 & 0.3381 & 2.5577 \\
+    \textit{events}   & $\textless 108,34\textgreater$ & 0.45 & a \textless b \textless c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.50 & \textbf{0.28} & 0.13 & 0.34 & 2.56 \\
         \midrule
-    E \& C   & \textless$\left\{\text{108}\right\}$\textgreater  & 0.4538 & a \textless b \textless c & 0.2442 & 0.1823 & 0.4017 & 0.4538 & 0.6794 & 1.4972 & 0.2799 & 0.1334 & 0.3377 & 2.5511 \\
+    \textit{events}   & $\textless 108\textgreater$  & 0.45 & a \textless b \textless c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.50 & 0.28 & 0.13 & 0.34 & 2.55 \\
         \midrule
-    E \& C   & \textless$\left\{\text{108}\right\}$,$\left\{\text{34}\right\}$,$\left\{\text{109}\right\}$\textgreater & 0.4531 & a \textless b \textless c & 0.2436 & 0.1816 & 0.4008 & 0.4531 & 0.6770 & 1.4941 & 0.2793 & 0.1326 & 0.3365 & 2.5487 \\
+    \textit{events}   & $\textless 108,34,109\textgreater$ & 0.45 & a \textless b \textless c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.49 & 0.28 & 0.13 & 0.34 & 2.55 \\
 	    \midrule
 	    \midrule
-	Fifa & \textless$\left\{\text{90}\right\}$\textgreater & 0.4005 & s \textless m \textless l & \textbf{0.4339} & 0.3914 & \textbf{0.9773} & 0.4005 & 0.5458 & \textbf{1.3626} & \textbf{0.6900} & \textbf{0.2601} & 0.5389 & \textbf{1.7984} \\
+	\textit{fifa} & $\textless 90\textgreater$ & 0.40 & s \textless m \textless l & \textbf{0.43} & 0.39 & \textbf{0.98} & 0.40 & 0.55 & \textbf{1.36} & \textbf{0.69} & \textbf{0.26} & 0.54 & \textbf{1.80} \\
 	    \midrule
-    	Fifa & \textless$\left\{\text{13}\right\}$\textgreater & 0.4020 & s \textless m \textless l & 0.4277 & 0.3911 & 0.9730 & 0.4020 & 0.5453 & 1.3566 & 0.6847 & 0.2558 & 0.2558 & 1.7843 \\
+    	\textit{fifa} & $\textless 13\textgreater$ & 0.40 & s \textless m \textless l & 0.43 & 0.39 & 0.97 & 0.40 & 0.54 & 1.36 & 0.68 & 0.26 & 0.26 & 1.78 \\
     	    \midrule
-    Fifa & \textless$\left\{\text{18}\right\}$\textgreater & 0.4041 & s \textless m \textless l & 0.4160 & 0.3900 & 0.9651 & 0.4041 & 0.5437 & 1.3457 & 0.6753 & 0.2479 & 0.5333 & 1.7577 \\
+    \textit{fifa} & $\textless 18\textgreater$ & 0.40 & s \textless m \textless l & 0.42 & 0.39 & 0.96 & 0.40 & 0.54 & 1.35 & 0.67 & 0.25 & 0.53 & 1.76 \\
         \midrule
-    Fifa & \textless$\left\{\text{30}\right\}$\textgreater & \textbf{0.4291} & s \textless m \textless l & 0.3950 & \textbf{0.4045} & 0.9427 & \textbf{0.4291} & \textbf{0.5641} & 1.3144 & 0.6349 & 0.2255 & \textbf{0.5454} & 1.7211 \\
+    \textit{fifa} & $\textless 30\textgreater$ & \textbf{0.42} & s \textless m \textless l & 0.39 & \textbf{0.40} & 0.94 & \textbf{0.43} & \textbf{0.56} & 1.31 & 0.63 & 0.22 & \textbf{0.54} & 1.72 \\
         \midrule
-    Fifa & \textless$\left\{\text{2}\right\}$\textgreater & 0.4003 & s \textless m \textless l & 0.3850 & 0.3795 & 0.9481 & 0.4003 & 0.5291 & 1.3219 & 0.6610 & 0.2309 & 0.5142 & 1.6836 \\
+    \textit{fifa} & $\textless 2\textgreater$ & 0.40 & s \textless m \textless l & 0.38 & 0.38 & 0.95 & 0.40 & 0.52 & 1.32 & 0.66 & 0.23 & 0.51 & 1.68 \\
         \bottomrule
     \end{tabularx}%
   \label{tab:results}%
