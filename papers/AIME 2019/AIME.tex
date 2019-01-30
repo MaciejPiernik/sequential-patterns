@@ -25,7 +25,7 @@
 
 \mainmatter
 
-\title{Assessing the effectiveness of sequences of treatments using state-changing sequential patterns}
+\title{Assessing the effectiveness of sequences of treatments using sequential patterns}
 
 \titlerunning{State--changing sequential patterns}
 
@@ -40,14 +40,11 @@ ul. Piotrowo 2, 60--965 Poznan, Poland\\
 \maketitle
 
 \begin{abstract}
-Designing algorithms for finding more meaningful patterns is one of the most important challenges in the field of sequential pattern mining.
-This can be achieved by using some additional information to enhance the evaluation of the obtained patterns.
-Such a situation is common in healthcare where medical treatments, pharmaceuticals (in general --- events), are administered to patients over time while simultaneously monitoring their state.
-In this paper, we propose to combine the information about the events with the information about the states of the patients targeted by these events when mining for sequential patterns.
-Our solution is designed to allow for a more meaningful assessment of the influence the event sequences have on the change in the patients' state.
-To be able to properly interpret the changes in states as outcomes of sequences of events, we rely on the concept of a control group and uplift modeling.
-State--changing sequential patterns are created in a three--step process involving sequential pattern mining, mapping states to changes, and calculating the uplift of each pattern.
-We illustrate the usefulness of our proposal with an experiment, in which we compare the outcome of the uplift measure with other measures used to assess the quality of sequential patterns.
+In this paper, we tackle the issue of assessing the effectiveness of sequences of treatments by introducing the concept of state--changing sequential patterns.
+Our proposal aims at identifying sequential patterns in an environment where certain actions are taken for patients (medical procedures, administration of pharmaceuticals, etc.) while simultaneously measuring some indicator of their health (e.g., blood pressure).
+We propose to combine the information about the events with the information about the states of the patients targeted by these events when mining for sequential patterns.
+To be able to properly interpret the changes in states as outcomes of sequences of events, we rely on the concept of a control group, known from clinical trials.
+We illustrate the usefulness of our proposal with an experiment.
 \keywords{sequential data, frequent patterns, uplift modeling}
 \end{abstract}
 
@@ -58,286 +55,74 @@ Sequential patterns are an extension of frequent patterns (or frequent itemsets,
 They find many applications in domains such as customer transaction analysis, web mining, software bug analysis, chemical and biological analysis~\cite{Aggarwal:2014}.
 Just like with traditional frequent patterns, there are many versions of sequential patterns, depending on the structure of the sequences.
 For instance, each event in a sequence can be either a single item or an itemset; precedence of elements can be implied solely by their order or explicitly by time; time can be used to further narrow the problem by constraining time gaps between elements; each event in a sequence can be described by a symbol, a number, or a set of features, etc.~\cite{Dong:2009}.
-On top of that, in scenarios such as classification, class information can be added to each element in each sequence.
-This results in a setting where a dataset contains sequences of pairs $\langle\texttt{event}, \texttt{class}\rangle$.
-In many real-world scenarios, however, such a setting is impossible to achieve, as the class information may be provided with a delay or even completely asynchronously from the analyzed events.
+On top of that, in scenarios such as classification or regression, target attribute can be added to each element in each sequence.
+This results in a setting where a dataset contains sequences of pairs $\langle\texttt{event}, \texttt{target}\rangle$.
+In many real-world scenarios, however, such a setting is impossible to achieve, as the value of the target attribute may be provided with a delay or even completely asynchronously from the analyzed events.
 Consider a sequence of treatments prescribed to a given patient for a certain disease measured by some indicator (e.g., blood pressure).
 After a series of events (e.g., administered pharmaceuticals, medical procedures, dietary regulations) the indicator may either improve, worsen, or stay unchanged.
 However, this result does not necessarily coincide with any of the events nor need it be a result of one, all, or any of the events.
 This scenario is universal when modeling people's behavior, opinion, or --- more generally speaking --- \textit{state}.
-As illustrated by the examples above, this problem is no longer described by a single sequence of events (like in classical sequential pattern mining), but rather by two connected sequences --- one with the events and the other with states.
+As illustrated by the examples above, this problem is no longer described by a single sequence of events (like in classical sequential pattern mining), but rather by two connected sequences --- one with the events and the other with target values.
 To the best of our knowledge, processing of sequential data of such composition has not yet been considered and is the focus of this research.
 
-The assumption underlying the described scenario is that the events in the sequences influence the outcomes registered by the states.
-A classical example of such an analysis performed on traditional data is the aforementioned clinical trial.
-In order to properly model the outcomes of patients' treatments, the results need to be evaluated against a control group.
-A method aiming specifically at this task is uplift modeling, as it's goal, as originally formulated, is to model the change in peoples' behavior as a result of intentional activity~\cite{Radcliffe:1999}.
+In this work--in--progress paper, we introduce the concept of state--changing sequential patterns along with several possible options of solving it.
+Inspired by clinical trials, these proposed solutions rely on the notion of a control group.
+We showcase the applicability of the presented concept in practical situations by performing an experiment or real--world dataset.
 
-In this paper, we propose a solution to the problem of finding state--changing sequential patterns.
-Our method is designed to work in a setting where the information about states is provided separately from the underlying sequence of events.
-Inspired by clinical trials, it relies on the notion of a control group and uses uplift modeling to factor this notion into the processing.
-We experimentally evaluate our proposal using real-world data to showcase its applicability in practical situations.
-
-The remainder of this paper is organized as follows.
-Section~\ref{sec:related} outlines the research related to our proposal.
-In Section~\ref{sec:main}, we formally define state--changing sequential patterns and show how to find them.
-In Section~\ref{sec:experiments}, we experimentally evaluate our proposal and discuss the obtained results.
-Finally, in Section~\ref{sec:conclusions}, we conclude the paper and draw lines of future research.
+Unlike in regular clinical trials where we try to nullify the impact of all other factors, state--changing sequential patterns allow for discovering potentially hidden dependencies between medical events from completely independent historical data where different events may appear in different histories.
 
 \section{Related Work}
 \label{sec:related}
-Sequential pattern mining has first been introduced by Rakesh Agrawal and Ramakrishnan Srikant~\cite{Agrawal:1995} through a market basket analysis model.
-As opposed to previous interpretations of this model as a set, sequential pattern mining takes into account the order of purchased items as well as the time of purchases.
-This way a set of items purchased throughout time can be otherwise analysed as a sequence.
-Unfortunately frequent pattern mining suffers from pattern explosion especially when dealing with sequences.
-This has led to many optimisation algorithms being created to improve sequential pattern mining.
+Sequential pattern mining has first been introduced by Agrawal and Srikant~\cite{Agrawal:1995} through a market basket analysis model.
+Since mining of such patterns is very costly, many optimisation algorithms being created to improve sequential pattern mining.
+Giannotti et al.~\cite{Giannotti:2006} propose an annotation solution to a problem of distinction between patterns with the same sequence but different transition times.
+Gebser et al.~\cite{Gebser:2016} propose to use knowledge-based sequence mining which takes into account expert knowledge in order to extract fewer patterns but of greater relevance.
 
-A couple of papers suggested ways to improve sequential pattern mining by applying additional information.
-Giannotti, Nanni and Pedreschi~\cite{Giannotti:2006} propose an annotation solution to a problem of distinction between patterns with the same sequence but different transition times.
-This distinction can be the key information in data analysis.
-Their TAS algorithm suggests that transition times should not be fixed, but rather emerge from input data.
-Another optimization has been proposed by Gebser, Guyet, Quiniou, Romero and Schaub~\cite{Gebser:2016}.
-The proposal was to use knowledge-based sequence mining which takes into account expert knowledge in order to extract fewer patterns but of greater relevance.
 Associating data with additional information not only can help in pattern distinction or evaluation of relevance but also in classifying it into categories.
-This was suggested by Pinto, Han, Pei, Wang, Chen and Dayal~\cite{Pinto:2001}.
+This was suggested by Pinto et al.~\cite{Pinto:2001}.
 Their algorithm focuses on multi-dimensional data and describes how certain patterns might apply to certain categories of data therefore the use of classification of patterns for their distinction.
-Multi-dimensional data has also been examined by Plantevit, Laurent A., Laurent D., Teisseire and Choong~\cite{Plantevit:2010}.
+Multi-dimensional data has also been examined by Plantevit et al.~\cite{Plantevit:2010}.
 The framework that has been presented by them concentrates on relevant frequent sequences in multi-dimensional and multi-level data.
-Rules generated by it can combine different dimensions such as location and product as well as different levels of granularity and are considered over time.
 It is a solution to mining relevant patterns in data of various dimensions, but there are other proposals for standard sequential data.
 One of such papers~\cite{Fowkes:2016} proposes an algorithm for mining the most relevant sequential patterns and also provides a ranking according to their interestingness.
-Since such ranking reflects the most important patterns it can be of great help to a human analyst in manual examination.
-Another paper\cite{Li:2015} about mining interesting sequential patterns uses leverage (difference between observed and expected frequencies of a pattern) as a measure of interest.
-Expected frequency is calculated assuming independence between any pair of subpatterns that compose it.
+Another paper~\cite{Li:2015} about mining interesting sequential patterns uses leverage (difference between observed and expected frequencies of a pattern) as a measure of interest.
 
-Usually when mining patterns, the aim is to find general interesting rules in a dataset.
-But another way of analysing it is by user.
-A solution to mining patterns with a user-centric approach has been described by Guidotti, Rossetti, Pappalardo, Giannotti and Pedreschi~\cite{Guidotti:2017}.
+A solution to mining patterns with a user-centric approach has been described by Guidotti et al.~\cite{Guidotti:2017}.
 In their market basket prediction model the focus is on single user’s history by using four characteristics: co-occurency (items often bought together), sequentiality (set of items often bought after another one), periodicity (sequential purchases in specific periods), recurrence (frequency of sequential purchases in a given period).
 
-All of the above papers propose optimization of sequential pattern mining.
-However from the administrative point of view in order to run such algorithms, estimation of runtime and space usage is of great significance.
-The answer has been described as bounding sequential patterns~\cite{Raissi:2011}.
-By computing the number of possible sequential patterns generated at a given length in a sequence database such estimations can be calculated.
-
-All papers mentioned in this section refer to sequential pattern mining.
-However none of them studies event sequential patterns with an impact on certain object’s state.
-To the best of our knowledge no such solution has been proposed so far.
+All papers mentioned in this section refer to sequential patterns, however, none of them studies patterns with an impact on certain objects' state.
+To the best of our knowledge, such a problem has not yet been considered.
 
 \section{State--changing sequential patterns}
 \label{sec:main}
-
-\subsection{Conceptual description}
-To illustrate both, the problem we are tackling and our proposed solution, consider the following example.
-Assume we have a history of marketing campaigns conducted by some company to it's clients.
-The history of campaigns directed at a single client (in order of their occurrence) forms a single sequence of events.
-Furthermore, assume that, from time to time, the company also monitored it's clients opinion about the company.
-The opinion can be either negative, neutral, or positive (where negative $<$ neutral $<$ positive).
-The history of a single client's opinions (in order of the time they were queried) forms a single sequence of the client's states.
-Both of these sequences form a complete client's history, example of which is illustrated in Fig.~\ref{fig:example}.
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=0.75\textwidth]{images/example}
-	\caption{Example of an analyzed sequence, where each $e_i$ represents events for a given object (e.g., marketing campaigns directed at a given client) and each $s_i$ represents the object's states (e.g., negative, neutral, or positive opinion about a given brand).}
-	\label{fig:example}
-\end{figure}
+Assume we have a history of medical events (performed procedures, administered pharmaceuticals, dietary regulations, etc.) of a given patient.
+Additionally, between these events the health of the patient was being monitored and recorded in a form of some indicators (e.g., blood test results).
+Now, given a database of such records for many patients, we can look for patterns of events which increase the chances of improving the patients' health.
+Typically, one would analyze each medical event in isolation from others to assess it's sole impact on patient's health, which is an appropriate approach when performing clinical trials.
+However, given historical data of the above--described composition, we can look for patterns of different events appearing in a certain order, i.e., sequential patterns.
 
 Given the above, the problem of state--changing sequential patterns can be formulated as follows.
-Is it possible to find a subsequence of events (e.g., marketing campaigns) which will have a high probability of influencing the objects' state in a desired manner (e.g., improving the clients' opinion about a brand).
+Is it possible to find a sequence of events which will have a high probability of influencing the patients' state in a desired manner.
 
-Our proposed solution for the above--defined problem is a 3-step generic method, which can be described as follows.
-In the first step, we mine the sequences of events for frequent sequential patterns, i.e., subsequences, which appear in the events dataset with a required minimal frequency.
-In the second step, we map the states sequences to sequences of directions of change.
-Each state is mapped to a change indicator based on it's relation to the previous state.
-A change from a lower to a higher state is encoded as ``$\uparrow$'' (\textit{up}); a change from a higher to a lower state is encoded as ``$\downarrow$'' (\textit{down}); and no change is encoded as ``$\emptyset$'' (\textit{none}).
-The first state is mapped to ``$\emptyset$''.
-In the third phase, we calculate the uplift measure of each sequential pattern for a given change indicator (e.g., ``$\uparrow$''), by contrasting the probability of this change appearing after a given pattern among the sequences with this pattern against the probability of this change appearing among the sequences without this pattern.
-After this process, we have a list of sequential patterns with the information about their impact on a given change of state.
-The whole process is summarized in Fig.~\ref{fig:concept}.
-
-\begin{figure}[!ht]
-	\centering
-		\includegraphics[width=\textwidth]{images/concept}
-	\caption{Illustration of the proposed method}
-	\label{fig:concept}
-\end{figure}
-
-\subsection{Formal description}
+Formally, the concept of state--changing sequential patterns can be defined as follows.
 By a \textit{sequence} $s=\text{\textless} s_1, s_2, ..., s_n\text{\textgreater}$ we understand an ordered multi--set of \textit{elements}, where each element $s_i$ is drawn from the same set.
-We distinguish two sets of sequences: sequences of events $\mathcal{S}^e$ and sequences of states $\mathcal{S}^s$, where the elements in the events sequences are drawn from the events set and the elements in the states sequences are drawn from the ordered states set.
+We distinguish two types of sequences: sequences of events $\mathcal{S}^e$ and sequences of states $\mathcal{S}^s$, where the elements in the events sequences are drawn from the events set and the elements in the states sequences are drawn from the ordered states set.
 Each events sequence $s^e\in\mathcal{S}^e$ has a corresponding states sequence $s^{se}\in\mathcal{S}^s$ (note that this correspondence is only one--sided).
 The corresponding sequences can be combined into a single sequence of events and states and there exists a total order between the elements of the combined sequences such that the order of the elements from each sequence is preserved.
 
 A sequence $s'$ which elements form a subset of elements of another sequence $s$ is called a \textit{subsequence} of $s$ and is denoted as $s'\subseteq s$.
 Given a set of sequences $\mathcal{S}$, a sequence $p$ is called a \textit{sequential pattern} (or \textit{pattern}), if it is a subsequence of at least \textit{minsup} sequences in $\mathcal{S}$: $|\{s\in\mathcal{S}:p\subseteq s\}|\geq\textit{minsup}$, where \textit{minsup} is a user--defined minimal support parameter.
 We denote that a sequence $s$ \textit{contains} a pattern $p$ if $p\subseteq s$.
-Given a sequence $s=\text{\textless} s_1,s_2,...,s_n\text{\textgreater}$, its subsequence $s'=\text{\textless} s_{i_1}, s_{i2}, ..., s_{i_m}\text{\textgreater}$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$.
+Given a sequence $s=\text{\textless} s_1,s_2,...,s_n\text{\textgreater}$, its subsequence $s'=\text{\textless} s_{i_1}, s_{i2}, ..., s_{i_m}\text{\textgreater}$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$, and before $s'$ if $1\leq x<i_1$.
+A \textit{state--changing sequential pattern} is a pattern which...
 
-Given the above, our method is defined as follows.
-Given a set of event sequences $\mathcal{S}^e$, a set of state sequences $\mathcal{S}^s$, a desired direction of change \textit{d}, and a minimal support threshold \textit{minsup}, first, we are mining $\mathcal{S}^e$ for sequential patterns $\mathcal{P}=\left\{p:|\{s^e\in\mathcal{S}^e:p\subseteq s^e\}|\geq\textit{minsup}\right\}$.
-Next, each sequence of states $s^s\in\mathcal{S}^s$ is mapped into a sequence of changes $s^c\in\mathcal{S}^c$:
-\begin{equation*}
-\begin{split}
-&s^c_1=-\\
-&s^c_i=\begin{cases}
-	\uparrow & s^s_{i-1}<s^s_i \\
-	\downarrow & s^s_{i-1}>s^s_i \\
-	\emptyset & otherwise
-\end{cases}
-\end{split}
-\end{equation*}
-where $i=2..|s^s|$.
-The mapping preserves the correspondence relation with the events sequence and the total order of the combined elements of the events and changes sequences.
-Finally, for each sequential pattern $p\in\mathcal{P}$ and a given change direction $d$, \textit{uplift} is calculated according to the following formula:
-\begin{equation*}
-\textit{uplift}(p,d)=P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})-P(d|\{s^e\in\mathcal{S}^e:p\not\subseteq s^e\}),
-\end{equation*}
-where $P(d^p|\{s^e\in\mathcal{S}^e:p\subseteq s^e\})$ denotes the probability of $d$ appearing after $p$ in sequences of events containing $p$, and $P(d|\{s^e\in\mathcal{S}^e:p\not\subseteq s^e\})$ denotes the probability of $d$ appearing in sequences of events without $p$.
-
-\section{Experiments}
+\section{Experiment}
 \label{sec:experiments}
-\subsection{Experimental Setup}
-This paper intends to evaluate the possibility of using state--changing sequential patterns as a means to analyzing real--world datasets as well as to assess the rightness of choice of uplift modeling to measure the influence of sequential patterns of events on a given direction of change in state.
-Our solution was evaluated in a series of experiments using anonymized private data and publicly available datasets.
-We processed full datasets with different support values for each of them using the Apriori algorithm to find sequential patterns.
-Furthermore, we calculated several measures for evaluating the quality of patterns, such as support, confidence, coverage, prevalence, recall, lift, leverage, added value, Jaccard, and relative risk, to assess the extent of influence of each pattern on the ``$\uparrow$'' direction of change.
-Afterward, we compared these measures with the uplift measure and analyzed the results. 
-
-The experiments were prepared using software components implemented in R language.
-Almost all of the software components were implemented using R standard library.
-The exception is the component used for generating two--element permutations of sequential candidate patterns, where we used ``gtools'' library.
-The experiments were conducted on a machine equipped with a quad-core I7-4770HQ @ 2,2 GHz processor and 16 GB of RAM.
-
-\subsection{Datasets}
-To prepare the experimental evaluation of the proposed solution, we used three datasets containing sequential data.
-The \textit{diabetes} dataset is publicly available through the UCI Machine Learning Repository~\cite{Kahn:1994}.
-It includes data about the activity of diabetes people and blood sugar level measurements.
-A private marketing company provided the \textit{events} dataset.
-It contains data about marketing activity as well as the outcome of this activity.
-The \textit{fifa} dataset contains data about clickstream from the FIFA World Cup 98 webpage.
-It is publicly available on the website of SPMF – an open source data mining library~\cite{Fournier}.
-Table \ref{tab:datasets} presents the summary of each dataset.
-
-To test the proposed solution, we had to augment two of the datasets with the information about states, which was not explicitly distinguished in the data.
-The \textit{diabetes} dataset contains numeric attribute describing blood sugar level.
-We discretized this attribute into three states describing blood sugar level as high, normal, and low, respectively.
-Regarding the \textit{fifa} dataset, we generated the missing sequences of states based on the original data.
-To each event, we assigned one of the three values describing the length of a subsequence, denoted as short, medium and long.
-A subsequence starts with the first element of the original sequence and finishes with a given event occurrence.
-
-\begin{table}[htbp]
-	\scriptsize
-  \centering
-  \caption{Characteristics of datasets}
-    \begin{tabularx}{\textwidth}{l@{}R@{}R@{}R@{}R@{}R@{}R@{}}
-		\toprule
-	{} & \multicolumn{3}{c}{Sequence of events} & \multicolumn{3}{c}{Sequence of states} \\
-        \toprule
-    Dataset & \#Instances & \#Elements & Avg. len. & \#Instances & \#Elements & Avg. len.\\
-		\midrule
-	\textit{diabetes}              &	3883	    &    20    &    7.6    &    3883    &    3    &    7.6 \\
-		\midrule
-	\textit{events} &	4656	    &    114   &	   21.2   &    10685   &    3    &    26,5 \\
-		\midrule
-	\textit{fifa}	                  &  20450    &  	29990  &   34.74   &    29990  &     3    &    34.74 \\
-        \bottomrule
-    \end{tabularx}%
-  \label{tab:datasets}%
-\end{table}%
-
-\subsection{Results}
-Table~\ref{tab:results} presents the results of our experiments.
-It contains five sequential patterns with the highest uplift measure from each of the datasets.
-We juxtaposed these results with the other pattern evaluation measures described above.
-Values marked in bold represent the best result of a given measure for a particular dataset.
-
-We processed the \textit{diabetes} dataset with $\textit{minsup} = 0.4$, and, as a result, we found 89 sequential patterns.
-The values of uplift measure for these sequential patterns were from the range $[-0.28, 0.21]$.
-Pattern $\text{\textless} 58\text{\textgreater}$ was found to have the highest value of uplift measure.
-The event 58 corresponds to pre--breakfast blood glucose measurement, so it is the first activity which diabetes people do every day and also the one about which is the most difficult to forget during a daily run, what is confirmed in the high support value of this sequential pattern.
-Because during the day fluctuations of the blood sugar level could be high, it is also highly possible that we will notice a decrease in blood sugar level, what is illustrated by the high confidence level.
-
-Regarding the \textit{events} dataset, we processed this dataset with $\textit{minsup} = 0.45$.
-We found 12 sequential patterns.
-The values of the uplift measure were from the range $[0.14, 0.25]$.
-Pattern $\text{\textless} 34, 109\text{\textgreater}$ has the highest uplift value.
-We do not have information about which marketing activity these two events describe, but the value of uplift measure suggests that these consecutive activities positively influence customers’ attitude towards the brand.
-The support value points out that this pattern is included in around 47\% of all sequences, while the confidence value shows that occurrence of this pattern positively affected customers in 40\%.
-
-Finally, we found 5 sequential patterns with $\textit{minsup}=0.4$ in the \textit{fifa} dataset.
-The values of uplift measure were from the range $[0.38, 0.43]$.
-The highest value of uplift measure can be found in pattern $\text{\textless} 90\text{\textgreater}$.
-We do not have the information about which website is described by the $90$ event in the dataset, but high value of the uplift measure indicates that users stayed longer on the FIFA website after seeing the content of this website.
-The support and confidence values were respectively 0.40 and 0.97.
-
-We noticed the high correlation between uplift and relative risk measures for each of the analyzed dataset.
-To understand why this correlation exists, it is required to take a closer look at the structure of these measures.
-Uplift tries to estimate the increase of some event's occurrence probability in a treated subpopulation over the corresponding probability when the subpopulation was not treated, whereas relative risk is the ratio of the same probabilities.
-Thus, uplift presents the actual change of probability, while relative risk expresses the relative relation between probabilities.
-
-Other measures evaluated during our experiments performed with a varying result.
-To understand this fact, it is again required to analyze the differences between the construction of uplift measure and other measures used in this experiment.
-Uplift divides the probability space into treated and not treated subspaces, while measures like coverage, prevalence, recall, lift, leverage, added value, and Jaccard estimate the probability of event occurrence by considering the entire probability space.
-This fact may lead to wrong interpretation of the obtained results and, in consequence, to wrong and potentially costly mistakes in decision--making based on this interpretation.
-
-\begin{sidewaystable}[htbp]
-	\scriptsize
-  \centering
-  \caption{Results of the experimental evaluation}
-    \begin{tabularx}{\textwidth}{l@{}c@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}R@{}}
-		\toprule
-	{} & \multicolumn{2}{c}{Sequential pattern} & \multicolumn{11}{c}{Pattern quality measures} \\
-        \toprule
-    Dataset          & Seq. pattern                                                                                      & Support & Class order & Uplift      & Support   & Confidence & Coverage  & Recall    & Lift      & Leverage  & Added value & Jaccard   & Relative risk\\
-		\midrule
-	\textit{diabetes}         & $\text{\textless} 58\text{\textgreater}$                                                         & \textbf{0.90}                  & h \text{\textless} n \text{\textless} l   & \textbf{0.21} & \textbf{0.88} & 0.98 & \textbf{0.90}  & \textbf{0.92} & 1.02 & 0.11 & 0.02 & \textbf{0.90} & \textbf{1.28} \\
-		\midrule                             
-	\textit{diabetes}         & $\text{\textless} 58,33\text{\textgreater}$                              & 0.80                  & h \text{\textless} n \text{\textless} l   & 0.13 & 0.79 & 0.99 & 0.80  & 0.82 & 1.03 & 0.22 & 0.02 & 0.81 & 1.14 \\
-		\midrule                             
-	\textit{diabetes}         & $\text{\textless} 58,33,33\text{\textgreater}$   & 0.73                  & h \text{\textless} n \text{\textless} l   & 0.09 & 0.73 & 0.99 & 0.73  & 0.75 & 1.03 & 0.28 & 0.02 & 0.75 & 1.10 \\
-		\midrule                             
-	\textit{diabetes}         & $\text{\textless} 33\text{\textgreater}$  & 0.87 & h \text{\textless} n \text{\textless} l & 0.09 & 0.85 & 0.98 & 0.87 & 0.88 & 1.01 & 0.14 & 0.01 & 0.86 & 1.10 \\
-		\midrule                             
-	\textit{diabetes}         & $\text{\textless} 58,62,33\text{\textgreater}$ & 0.68 & h \text{\textless} n \text{\textless} l & 0.08 & 0.67 & \textbf{0.99} & 0.68 & 0.69 & \textbf{1.03} & \textbf{0.34} & \textbf{0.03} & 0.69 & 1.09 \\
-	    \midrule
-	    \midrule
-    \textit{events}   & $\text{\textless} 34,109\text{\textgreater}$ & 0.46 & a \text{\textless} b \text{\textless} c & \textbf{0.25} & \textbf{0.19} & \textbf{0.40} & 0.46 & \textbf{0.70} & \textbf{1.50} & 0.28 & \textbf{0.13} & \textbf{0.34} & \textbf{2.68} \\
-        \midrule
-    \textit{events}   & $\text{\textless} 109\text{\textgreater}$ & \textbf{0.47} & a \text{\textless} b \text{\textless} c & 0.25 & \textbf{0.19} & 0.40 & \textbf{0.47} & 0.70 & 1.50 & 0.28 & 0.13 & 0.34 & 2.68 \\
-        \midrule
-    \textit{events}   & $\text{\textless} 108,34\text{\textgreater}$ & 0.45 & a \text{\textless} b \text{\textless} c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.50 & \textbf{0.28} & 0.13 & 0.34 & 2.56 \\
-        \midrule
-    \textit{events}   & $\text{\textless} 108\text{\textgreater}$  & 0.45 & a \text{\textless} b \text{\textless} c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.50 & 0.28 & 0.13 & 0.34 & 2.55 \\
-        \midrule
-    \textit{events}   & $\text{\textless} 108,34,109\text{\textgreater}$ & 0.45 & a \text{\textless} b \text{\textless} c & 0.24 & 0.18 & 0.40 & 0.45 & 0.68 & 1.49 & 0.28 & 0.13 & 0.34 & 2.55 \\
-	    \midrule
-	    \midrule
-	\textit{fifa} & $\text{\textless} 90\text{\textgreater}$ & 0.40 & s \text{\textless} m \text{\textless} l & \textbf{0.43} & 0.39 & \textbf{0.98} & 0.40 & 0.55 & \textbf{1.36} & \textbf{0.69} & \textbf{0.26} & 0.54 & \textbf{1.80} \\
-	    \midrule
-    	\textit{fifa} & $\text{\textless} 13\text{\textgreater}$ & 0.40 & s \text{\textless} m \text{\textless} l & 0.43 & 0.39 & 0.97 & 0.40 & 0.54 & 1.36 & 0.68 & 0.26 & 0.26 & 1.78 \\
-    	    \midrule
-    \textit{fifa} & $\text{\textless} 18\text{\textgreater}$ & 0.40 & s \text{\textless} m \text{\textless} l & 0.42 & 0.39 & 0.96 & 0.40 & 0.54 & 1.35 & 0.67 & 0.25 & 0.53 & 1.76 \\
-        \midrule
-    \textit{fifa} & $\text{\textless} 30\text{\textgreater}$ & \textbf{0.42} & s \text{\textless} m \text{\textless} l & 0.39 & \textbf{0.40} & 0.94 & \textbf{0.43} & \textbf{0.56} & 1.31 & 0.63 & 0.22 & \textbf{0.54} & 1.72 \\
-        \midrule
-    \textit{fifa} & $\text{\textless} 2\text{\textgreater}$ & 0.40 & s \text{\textless} m \text{\textless} l & 0.38 & 0.38 & 0.95 & 0.40 & 0.52 & 1.32 & 0.66 & 0.23 & 0.51 & 1.68 \\
-        \bottomrule
-    \end{tabularx}%
-  \label{tab:results}%
-\end{sidewaystable}%
 
 
 \section{Conclusions}
 \label{sec:conclusions}
-In this paper, we presented a solution to the problem of finding subsequences of events (e.g., marketing campaigns) with high probability of influencing the state of the objects targeted by these events (e.g., changing the clients’ opinion about a given brand).
-We call such subsequences state--changing sequential patterns.
-Our method works by mining for frequent patterns in the events sequences, mapping the states sequences to sequences encoding the changes in state, and evaluating the influence of the obtained patterns on these changes using uplift modeling.
-The intuition behind our solution was to take the approach common from clinical trials and extend it to sequential data.
-By experimentally testing our proposal on 3 real--world datasets we validate its usefulness for practical problems.
-Furthermore, we empirically compare the employed uplift measure with 10 other measures used for sequential pattern evaluation.
-The results reveal that our method allows to find sequences which could otherwise be neglected.
-It also shows that uplift could be used interchangeably with relative risk, however, this was to be expected as these measures belong to the same family and are highly related.
+In this paper, ...
 
 As the issue tackled in this paper is itself novel, the possibilities of extending this work are very broad.
 As our most immediate future research focus, we plan on experimenting with introducing time constraints to the problem.
@@ -345,7 +130,7 @@ The constraints could concern both, events (e.g., restricting time gaps between 
 Moreover, we intend to create other sequential pattern evaluation measures dedicated for this specific problem.
 We would also like to quantify the differences between states and include those differences in the analysis, as our current approach only registers the changes in states' direction.
 
-\subsubsection*{Acknowledgments.} This research is partly funded by the Polish National Science Center under Grant No. DEC-2015/19/B/ST6/02637.
+\subsubsection*{Acknowledgments} This research is partly funded by the Polish National Science Center under Grant No. DEC-2015/19/B/ST6/02637.
 
 \bibliographystyle{splncs}
 \bibliography{Bibliography}
