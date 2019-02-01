@@ -15,7 +15,7 @@
             pdfauthor={Maciej Piernik, Joanna Solomiewicz, Arkadiusz Jachnik},
             pdftitle={State--changing sequential patterns},
             pdfsubject={Sequential pattern mining},
-            pdfkeywords={sequential data, frequent patterns, uplift modeling}]{hyperref}
+            pdfkeywords={sequential data, frequent patterns, change modeling}]{hyperref}
 
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 \newcommand{\argmax}[1]{\underset{#1}{\operatorname{argmax}}\;}
@@ -45,7 +45,7 @@ Our proposal aims at identifying sequential patterns in an environment where cer
 We propose to combine the information about the events with the information about the states of the patients targeted by these events when mining for sequential patterns.
 To be able to properly interpret the changes in states as outcomes of sequences of events, we rely on the concept of a control group, known from clinical trials.
 We illustrate the usefulness of our proposal with an experiment.
-\keywords{sequential data, frequent patterns, uplift modeling}
+\keywords{sequential data, frequent patterns, change modeling}
 \end{abstract}
 
 \section{Introduction}
@@ -65,11 +65,9 @@ This scenario is universal when modeling people's behavior, opinion, or --- more
 As illustrated by the examples above, this problem is no longer described by a single sequence of events (like in classical sequential pattern mining), but rather by two connected sequences --- one with the events and the other with target values.
 To the best of our knowledge, processing of sequential data of such composition has not yet been considered and is the focus of this research.
 
-In this work--in--progress paper, we introduce the concept of state--changing sequential patterns along with several possible options of solving it.
-Inspired by clinical trials, these proposed solutions rely on the notion of a control group.
-We showcase the applicability of the presented concept in practical situations by performing an experiment or real--world dataset.
-
-Unlike in regular clinical trials where we try to nullify the impact of all other factors, state--changing sequential patterns allow for discovering potentially hidden dependencies between medical events from completely independent historical data where different events may appear in different histories.
+In this paper, we introduce the concept of state--changing sequential patterns along with a method to find them.
+Unlike in regular clinical trials, where we try to nullify the impact of all other factors, state--changing sequential patterns focus on discovering potentially hidden dependencies between medical events.
+We showcase the applicability of the presented concept in practical situations by performing a proof--of--concept experiment.
 
 \section{Related Work}
 \label{sec:related}
@@ -113,22 +111,43 @@ The corresponding sequences can be combined into a single sequence of events and
 A sequence $s'$ which elements form a subset of elements of another sequence $s$ is called a \textit{subsequence} of $s$ and is denoted as $s'\subseteq s$.
 Given a set of sequences $\mathcal{S}$, a sequence $p$ is called a \textit{sequential pattern} (or \textit{pattern}), if it is a subsequence of at least \textit{minsup} sequences in $\mathcal{S}$: $|\{s\in\mathcal{S}:p\subseteq s\}|\geq\textit{minsup}$, where \textit{minsup} is a user--defined minimal support parameter.
 We denote that a sequence $s$ \textit{contains} a pattern $p$ if $p\subseteq s$.
-Given a sequence $s=\text{\textless} s_1,s_2,...,s_n\text{\textgreater}$, its subsequence $s'=\text{\textless} s_{i_1}, s_{i2}, ..., s_{i_m}\text{\textgreater}$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$, and before $s'$ if $1\leq x<i_1$.
-A \textit{state--changing sequential pattern} is a pattern which...
+Given a sequence $s=\text{\textless} s_1,s_2,...,s_n\text{\textgreater}$, its subsequence $s'=\text{\textless} s_{i_1}, s_{i2}, ..., s_{i_m}\text{\textgreater}$, $1\leq m\leq n$, and an element $s_x\in s$, we say that $s_x$ appears in $s$ after $s'$ if $i_m<x\leq n$, and before $s'$ if $1\leq x<i_1$, denoted respectively as $s'\prec^{s} s_x$ and $s'\succ^{s} s_x$.
+Given the above, a \textit{state--changing sequential pattern} can be generally defined as a pattern $p$, for which the probability of a certain change in state (positive or negative) appearing in any given sequence $s$ after this pattern is higher than the probability of this change appearing without this pattern by at least $minchange$:
+\begin{equation}
+P(\underset{s_i,s_j \in s}{\exists} s_i<s_j|s_i \prec^{s} p \succ^{s} s_j) - P(\underset{s_i,s_j \in s}{\exists}|\neg(s_i \prec^{s} p \succ^{s} s_j)) > minchange
+\label{eq:scsp}
+\end{equation}
+$s_i$ and $s_j$ indicate states, $i<j$ for positive change, $j<i$ for negative change, and $minchange$ is a user--defined threshold.
 
-\section{Experiment}
-\label{sec:experiments}
+Ideally, to calculate the second probability, i.e., the change happening without the pattern, we would use a separate control group.
+However, unfortunately such data in historical patients' records are very rare.
+Therefore, to make this definition usable on any given dataset, let us split each sequence into smaller sequences based on the following principle.
+For any three consecutive states $s_i, s_j, s_k$, if $sign(s_k-s_j)\neq sign(s_j-s_i)$ then $s_j$ marks the end of one sequence of events an the beginning of another.
+For every such sequence of events we calculate the change between the state which marks the beginning and the end of this sequence.
+The sequences with positive and negative change fall into separate datasets: $\mathcal{S}^+$ and $\mathcal{S}^-$, respectively.
+Now, given the above datasets, we can mine for sequential patterns in each of these sets separately and select the state--changing sequential patterns as those $p$ for which:
+$$\frac{|support(p,\mathcal{S}^+)-support(p,\mathcal{S}^-)|}{\text{total number of sequences}}> minchange$$
+where $support(p,\mathcal{S})=|\{s\in \mathcal{S}:p\subseteq s\}|$.
+
+\section{Application}
+Let us now illustrate the usefulness of state--changing sequential patterns with a simple experiment.
+It serves rather as a proof of concept than an evaluation of any particular method or measure.
+In the experiment we use the \textit{diabetes} dataset, which is publicly available through the UCI Machine Learning Repository~\cite{Kahn:1994}.
+It includes data about medical events associated with patients suffering from diabetes along with their blood sugar level measurements.
+The dataset consists of 3883 sequences composed of 20 different events with an average length of 7.6 events per sequence and an equal number of sequences of states, representing patients' blood sugar measurments.
+The code for the experiment was written in Python language and is available at \url{https://github.com/joanna-solomiewicz/state-changing-sequential-patterns}.
+
 
 
 \section{Conclusions}
 \label{sec:conclusions}
-In this paper, ...
-
-As the issue tackled in this paper is itself novel, the possibilities of extending this work are very broad.
-As our most immediate future research focus, we plan on experimenting with introducing time constraints to the problem.
+In this paper, we introduce the concept of state--changing sequential patterns along with a simple way of discovering them.
+The concept allows for finding patterns of events which have high probability of causing a certain change of state.
+We define and formalize the concept, and illustrate it's applicability to patients' medical histories with an empirical example.
+As this paper reports a work--in--progress research, there is still much theoretical and experimental work to explore.
+After exploring the theoretical properties and thoroughly experimenting with the introduced concept, we plan on including time constraints in the analysis.
 The constraints could concern both, events (e.g., restricting time gaps between events) and states (e.g., the certainty of a given object's state can decay over time until new state appears).
-Moreover, we intend to create other sequential pattern evaluation measures dedicated for this specific problem.
-We would also like to quantify the differences between states and include those differences in the analysis, as our current approach only registers the changes in states' direction.
+Moreover, we intend to create other sequential pattern evaluation measures dedicated for this specific problem as well as an efficient algorithm which would cut the unpromising patterns at an earlier stage to enhance efficiency.
 
 \subsubsection*{Acknowledgments} This research is partly funded by the Polish National Science Center under Grant No. DEC-2015/19/B/ST6/02637.
 
